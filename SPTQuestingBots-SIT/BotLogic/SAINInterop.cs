@@ -1,4 +1,4 @@
-using BepInEx.Bootstrap;
+﻿using BepInEx.Bootstrap;
 using EFT;
 using HarmonyLib;
 using System;

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Aki.Custom.Airdrops;
-using StayInTarkov;
+using StayInTarkov.AkiSupport.Airdrops;
+using Aki.Reflection.Patching;
 
 namespace SPTQuestingBots.Patches
 {

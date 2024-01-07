@@ -17,6 +17,7 @@ namespace SPTQuestingBots
     [BepInPlugin("com.DanW.QuestingBots", "DanW-QuestingBots", "0.3.5")]
     public class QuestingBotsPlugin : BaseUnityPlugin
     {
+        public static string ModName { get; private set; } = "???";
         private void Awake()
         {
             Logger.LogInfo("Loading QuestingBots...");
@@ -24,17 +25,19 @@ namespace SPTQuestingBots
             Logger.LogInfo("Loading QuestingBots...getting configuration data...");
             ConfigController.GetConfig();
             LoggingController.Logger = Logger;
+            ModName = Info.Metadata.Name;
 
             if (ConfigController.Config.Enabled)
             {
                 LoggingController.LogInfo("Loading QuestingBots...enabling patches and controllers...");
 
+                new Patches.CheckSPTVersionPatch().Enable();
                 new Patches.GameWorldOnDestroyPatch().Enable();
                 new Patches.OnGameStartedPatch().Enable();
                 new Patches.BotOwnerBrainActivatePatch().Enable();
                 new Patches.IsFollowerSuitableForBossPatch().Enable();
                 new Patches.OnBeenKilledByAggressorPatch().Enable();
-                // new Patches.AirdropLandPatch().Enable();
+                new Patches.AirdropLandPatch().Enable();
 
                 if (ConfigController.Config.InitialPMCSpawns.Enabled)
                 {

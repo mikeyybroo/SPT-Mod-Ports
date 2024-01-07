@@ -441,16 +441,11 @@ namespace SPTQuestingBots.Controllers.Bots
 
         public static BotJobAssignment GetNewBotJobAssignment(this BotOwner bot)
         {
-            // TODO: SAIN interop not supported
-            
-            // float timeSinceSpawning = GClass1416.PastTimeSeconds(Singleton<AbstractGame>.Instance.GameTimer);
-            // if ( timeSinceSpawning > 20)
-            // {
-            //     BotObjectiveManager botObjectiveManager = BotObjectiveManager.GetObjectiveManagerForBot(bot);
-            //     botObjectiveManager?.BotMonitor?.InstructBotToExtract();
-
-            //     return null;
-            // }
+            // Do not select another quest objective if the bot wants to extract
+            if (BotObjectiveManager.GetObjectiveManagerForBot(bot)?.DoesBotWantToExtract() == true)
+            {
+                return null;
+            }
 
             // Get the bot's most recent assingment if applicable
             QuestQB quest = null;
@@ -532,7 +527,7 @@ namespace SPTQuestingBots.Controllers.Bots
                 .Where(q => !invalidQuests.Contains(q))
                 .Where(q => q.NumberOfValidObjectives > 0)
                 .Where(q => q.CanMoreBotsDoQuest())
-                .Where(q => q.CanAssignToBot(bot))
+                // .Where(q => q.CanAssignToBot(bot)) // TODO: Fixme -> Workaround, if there are no quests available for bots, it may start throwing exceptions like no tomorrow.
                 .GroupBy
                 (
                     q => q.Priority,
@@ -588,6 +583,35 @@ namespace SPTQuestingBots.Controllers.Bots
 
             // If no quest was assigned to the bot, randomly assign a quest in the first priority group as a fallback method
             return groupedQuests.First().Quests.Random();
+        }
+        
+        public static IEnumerable<BotJobAssignment> GetCompletedOrAchivedQuests(this BotOwner bot)
+        {
+            if (!botJobAssignments.ContainsKey(bot.Profile.Id))
+            {
+                return Enumerable.Empty<BotJobAssignment>();
+            }
+
+            return botJobAssignments[bot.Profile.Id].Where(a => a.IsCompletedOrArchived);
+        }
+
+        public static int NumberOfCompletedOrAchivedQuests(this BotOwner bot)
+        {
+            IEnumerable<BotJobAssignment> assignments = bot.GetCompletedOrAchivedQuests();
+
+            return assignments
+                .Distinct(a => a.QuestAssignment)
+                .Count();
+        }
+
+        public static int NumberOfCompletedOrAchivedEFTQuests(this BotOwner bot)
+        {
+            IEnumerable<BotJobAssignment> assignments = bot.GetCompletedOrAchivedQuests();
+
+            return assignments
+                .Distinct(a => a.QuestAssignment)
+                .Where(a => a.QuestAssignment.IsEFTQuest)
+                .Count();
         }
 
         public static void WriteQuestLogFile(long timestamp)

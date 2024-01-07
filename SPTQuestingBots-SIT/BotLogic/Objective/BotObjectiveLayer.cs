@@ -95,7 +95,7 @@ namespace SPTQuestingBots.BotLogic.Objective
             // BotHiveMindMonitor.UpdateValueForBot(BotHiveMindSensorType.WantsToLoot, BotOwner, false);
             
             // Check if the bot is currently extracting or wants to extract via SAIN
-            if (objectiveManager.IsAllowedToTakeABreak() && objectiveManager.BotMonitor.WantsToExtract())
+            if (objectiveManager.IsAllowedToTakeABreak() && objectiveManager.BotMonitor.IsTryingToExtract())
             {
                 objectiveManager.StopQuesting();
 
@@ -164,7 +164,8 @@ namespace SPTQuestingBots.BotLogic.Objective
                 case QuestAction.MoveToPosition:
                     if (objectiveManager.MustUnlockDoor)
                     {
-                        setNextAction(BotActionType.UnlockDoor, "UnlockDoor (" + objectiveManager.GetCurrentQuestInteractiveObject().Id + ")");
+                        string interactiveObjectShortID = objectiveManager.GetCurrentQuestInteractiveObject().Id.Abbreviate();
+                        setNextAction(BotActionType.UnlockDoor, "UnlockDoor (" + interactiveObjectShortID + ")");
                     }
                     else
                     {
@@ -185,6 +186,14 @@ namespace SPTQuestingBots.BotLogic.Objective
 
                 case QuestAction.ToggleSwitch:
                     setNextAction(BotActionType.ToggleSwitch, "ToggleSwitch");
+                    return updatePreviousState(true);
+                
+                case QuestAction.RequestExtract:
+                    if (objectiveManager.BotMonitor.TryInstructBotToExtract())
+                    {
+                        objectiveManager.StopQuesting();
+                    }
+                    objectiveManager.CompleteObjective();
                     return updatePreviousState(true);
             }
 

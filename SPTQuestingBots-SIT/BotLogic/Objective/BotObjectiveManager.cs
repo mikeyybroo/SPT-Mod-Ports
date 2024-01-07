@@ -96,7 +96,14 @@ namespace SPTQuestingBots.BotLogic.Objective
 
             base.UpdateInterval = 200;
             botOwner = _botOwner;
+            
+            if (BotMonitor != null)
+            {
+                return;
+            }
+            
             BotMonitor = new BotMonitor(botOwner);
+
         }
 
         private void updateBotType()
@@ -219,8 +226,8 @@ namespace SPTQuestingBots.BotLogic.Objective
 
             assignment?.Inactivate();
 
-            assignment = botOwner.GetNewBotJobAssignment();
-            LoggingController.LogInfo("Bot " + botOwner.GetText() + " is now doing " + assignment.ToString());
+            assignment = botOwner?.GetNewBotJobAssignment();
+            LoggingController.LogInfo("Bot " + botOwner.GetText() + " is now doing " + (assignment?.ToString() ?? "[NULL]"));
 
             return true;
         }
@@ -291,6 +298,22 @@ namespace SPTQuestingBots.BotLogic.Objective
             }
 
             return assignment?.QuestObjectiveStepAssignment?.InteractiveObject;
+        }
+        
+        public bool DoesBotWantToExtract()
+        {
+            if (BotMonitor.IsTryingToExtract())
+            {
+                return true;
+            }
+
+            if (BotMonitor.IsBotReadyToExtract() && BotMonitor.TryInstructBotToExtract())
+            {
+                StopQuesting();
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -112,6 +112,7 @@
     <Compile Include="BotLogic\Objective\ToggleSwitchAction.cs" />
     <Compile Include="BotLogic\Objective\UnlockDoorAction.cs" />
     <Compile Include="BotLogic\SAINInterop.cs" />
+    <Compile Include="Configuration\ExtractionRequirementsConfig.cs" />
     <Compile Include="Configuration\QuestingConfig.cs" />
     <Compile Include="Configuration\UnlockingDoorsConfig.cs" />
     <Compile Include="Controllers\Bots\BotBrainHelpers.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="Controllers\Bots\BotRegistrationManager.cs" />
     <Compile Include="Helpers\InteractiveObjectHelpers.cs" />
     <Compile Include="Helpers\ItemHelpers.cs" />
+    <Compile Include="Helpers\VersionCheckHelper.cs" />
     <Compile Include="Models\BotBrainType.cs" />
     <Compile Include="BehaviorExtensions\CustomLayerDelayedUpdate.cs" />
     <Compile Include="BehaviorExtensions\CustomLogicDelayedUpdate.cs" />
@@ -164,14 +166,16 @@
     <Compile Include="Models\QuestSpawnPointObjective.cs" />
     <Compile Include="Models\QuestZoneObjective.cs" />
     <Compile Include="Models\SerializableVector3.cs" />
+    <Compile Include="Patches\AirdropLandPatch.cs" />
     <Compile Include="Patches\BossLocationSpawnActivatePatch.cs" />
     <Compile Include="Patches\BotOwnerBrainActivatePatch.cs" />
     <Compile Include="Patches\BotOwnerCreatePatch.cs" />
+    <Compile Include="Patches\CheckSPTVersionPatch.cs" />
     <Compile Include="Patches\GameWorldOnDestroyPatch.cs" />
     <Compile Include="Patches\InitBossSpawnLocationPatch.cs" />
     <Compile Include="Patches\IsFollowerSuitableForBossPatch.cs" />
     <Compile Include="Patches\OnBeenKilledByAggressorPatch.cs" />
-    <!-- <Compile Include="Patches\AirdropLandPatch.cs" /> -->
+    <Compile Include="Patches\AirdropLandPatch.cs" />
     <Compile Include="Patches\OnGameStartedPatch.cs" />
     <Compile Include="Patches\ReadyToPlayPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

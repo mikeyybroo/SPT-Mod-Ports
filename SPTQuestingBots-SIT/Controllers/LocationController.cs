@@ -9,11 +9,8 @@ using Comfort.Common;
 using EFT;
 using EFT.Game.Spawning;
 using EFT.Interactive;
-using SPTQuestingBots.Controllers;
-using SPTQuestingBots.Models;
 using UnityEngine;
 using UnityEngine.AI;
-using GameTimerHelpers = GClass1368;
 
 namespace SPTQuestingBots.Controllers
 {
@@ -175,6 +172,14 @@ namespace SPTQuestingBots.Controllers
 
             // Sort the matching doors based on distance to the position
             return lockedDoorsAndDistance.OrderBy(d => d.Value).Select(d => d.Key);
+        }
+        
+        public static void ReportUnlockedDoor(Door door)
+        {
+            if (areLockedDoorsUnlocked.ContainsKey(door))
+            {
+                areLockedDoorsUnlocked[door] = true;
+            }
         }
 
         public static SpawnPointParams[] GetAllValidSpawnPointParams()
@@ -352,7 +357,7 @@ namespace SPTQuestingBots.Controllers
 
                 // Check if the spawn point is closer than the previous one selected
                 float distance = Vector3.Distance(postition, allSpawnPoints[s].Position.ToUnityVector3());
-                if (distance < nearestDistance)
+                if (distance < nearestDistance || excludedSpawnPoints.Contains(nearestSpawnPoint))
                 {
                     nearestSpawnPoint = allSpawnPoints[s];
                     nearestDistance = distance;
@@ -362,7 +367,7 @@ namespace SPTQuestingBots.Controllers
             // Ensure at least one possible spawn point hasn't also been excluded
             if (excludedSpawnPoints.Contains(nearestSpawnPoint))
             {
-                throw new InvalidOperationException("All possible spawn points are excluded.");
+                throw new InvalidOperationException("All possible spawn points (" + allSpawnPoints.Length + ") are in the blacklist (" + excludedSpawnPoints.Length + ")");
             }
 
             return nearestSpawnPoint;

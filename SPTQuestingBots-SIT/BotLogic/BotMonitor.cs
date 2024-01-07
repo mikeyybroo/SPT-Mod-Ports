@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Comfort.Common;
 using StayInTarkov;
 using EFT;
 using EFT.HealthSystem;
 using SPTQuestingBots.Controllers;
+using SPTQuestingBots.Controllers.Bots;
 using UnityEngine;
 
 namespace SPTQuestingBots.BotLogic
@@ -24,6 +26,8 @@ namespace SPTQuestingBots.BotLogic
         private bool wasLooting = false;
         private bool hasFoundLoot = false;
         private bool canUseSAINInterop = false;
+        private int minTotalQuestsForExtract = int.MaxValue;
+        private int minEFTQuestsForExtract = int.MaxValue;
 
         public BotMonitor(BotOwner _botOwner)
         {
@@ -37,11 +41,15 @@ namespace SPTQuestingBots.BotLogic
 
             stationaryWSLayerMonitor = botOwner.GetPlayer.gameObject.AddComponent<LogicLayerMonitor>();
             stationaryWSLayerMonitor.Init(botOwner, "StationaryWS");
-
+            
+            
             if (SAIN.Plugin.SAINInterop.Init())
             {
                 canUseSAINInterop = true;
-                LoggingController.LogWarning("SAIN Interop detected");
+            }
+            else
+            {
+                LoggingController.LogWarning("SAIN Interop not detected. Cannot instruct " + botOwner.GetText() + " to extract.");
             }
         }
 
@@ -91,7 +99,7 @@ namespace SPTQuestingBots.BotLogic
             return false;
         }
 
-        public bool WantsToExtract()
+        public bool IsTryingToExtract()
         {
             if (!extractLayerMonitor.CanLayerBeUsed)
             {
@@ -106,6 +114,91 @@ namespace SPTQuestingBots.BotLogic
 
             return false;
         }
+        
+                public bool TryInstructBotToExtract()
+        {
+            if (!canUseSAINInterop)
+            {
+                //LoggingController.LogWarning("SAIN Interop not detected");
+                return false;
+            }
+
+            if (SAIN.Plugin.SAINInterop.TryExtractBot(botOwner))
+            {
+                LoggingController.LogInfo("Instructing " + botOwner.GetText() + " to extract now");
+
+                foreach(BotOwner follower in HiveMind.BotHiveMindMonitor.GetFollowers(botOwner))
+                {
+                    if (SAIN.Plugin.SAINInterop.TryExtractBot(follower))
+                    {
+                        LoggingController.LogInfo("Instructing follower " + follower.GetText() + " to extract now");
+                    }
+                    else
+                    {
+                        LoggingController.LogWarning("Could not instruct follower " + follower.GetText() + " to extract now");
+                    }
+                }
+
+                return true;
+            }
+            else
+            {
+                LoggingController.LogError("Cannot instruct " + botOwner.GetText() + " to extract. SAIN Interop not initialized properly.");
+            }
+
+            return false;
+        }
+
+        public bool IsBotReadyToExtract()
+        {
+            int minRaidET = GClass1416.SessionSeconds(Singleton<AbstractGame>.Instance.GameTimer);
+            float remainingRaidTime = GClass1416.EscapeTimeSeconds(Singleton<AbstractGame>.Instance.GameTimer);
+
+            if (GClass1416.PastTimeSeconds(Singleton<AbstractGame>.Instance.GameTimer) < (minRaidET - (GClass1416.SessionSeconds(Singleton<AbstractGame>.Instance.GameTimer) - remainingRaidTime)))
+            {
+                return false;
+            }
+
+            if (remainingRaidTime < ConfigController.Config.Questing.ExtractionRequirements.MustExtractTimeRemaining)
+            {
+                LoggingController.LogInfo(botOwner.GetText() + " is ready to extract because the raid will be over in " + remainingRaidTime + " seconds.");
+                return true;
+            }
+
+            System.Random random = new System.Random();
+            float initialRaidTimeFraction = (float)remainingRaidTime / GClass1416.SessionSeconds(Singleton<AbstractGame>.Instance.GameTimer);
+
+            if (minTotalQuestsForExtract == int.MaxValue)
+            {
+                Configuration.MinMaxConfig minMax = ConfigController.Config.Questing.ExtractionRequirements.TotalQuests * initialRaidTimeFraction;
+                minTotalQuestsForExtract = random.Next((int)minMax.Min, (int)minMax.Max);
+            }
+
+            int totalQuestsCompleted = botOwner.NumberOfCompletedOrAchivedQuests();
+            if (totalQuestsCompleted >= minTotalQuestsForExtract)
+            {
+                LoggingController.LogInfo(botOwner.GetText() + " has completed " + totalQuestsCompleted + " quests and is ready to extact.");
+                return true;
+            }
+            //LoggingController.LogInfo(botOwner.GetText() + " has completed " + totalQuestsCompleted + "/" + minTotalQuestsForExtract + " quests");
+
+            if (minEFTQuestsForExtract == int.MaxValue)
+            {
+                Configuration.MinMaxConfig minMax = ConfigController.Config.Questing.ExtractionRequirements.EFTQuests * initialRaidTimeFraction;
+                minEFTQuestsForExtract = random.Next((int)minMax.Min, (int)minMax.Max);
+            }
+
+            int EFTQuestsCompleted = botOwner.NumberOfCompletedOrAchivedEFTQuests();
+            if (EFTQuestsCompleted >= minEFTQuestsForExtract)
+            {
+                LoggingController.LogInfo(botOwner.GetText() + " has completed " + EFTQuestsCompleted + " EFT quests and is ready to extact.");
+                return true;
+            }
+            //LoggingController.LogInfo(botOwner.GetText() + " has completed " + EFTQuestsCompleted + "/" + minEFTQuestsForExtract + " EFT quests");
+
+            return false;
+        }
+
 
         public bool ShouldWaitForFollowers()
         {
