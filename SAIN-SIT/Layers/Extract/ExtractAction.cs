@@ -1,4 +1,5 @@
-﻿using BepInEx.Logging;
+﻿using System.Collections.Generic;
+using BepInEx.Logging;
 using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
@@ -10,6 +11,7 @@ using Systems.Effects;
 using EFT.Interactive;
 using System.Linq;
 using SAIN.Components.BotController;
+using StayInTarkov.Coop.Web;
 using UnityEngine.AI;
 
 namespace SAIN.Layers
@@ -131,7 +133,7 @@ namespace SAIN.Layers
                 ExtractTimer = -1f;
                 ReCalcPathTimer = Time.time + 4f;
 
-                NavMeshPathStatus pathStatus = BotOwner.Mover.GoToPoint(point, true, 0.5f, false, false);
+                NavMeshPathStatus pathStatus = BotOwner.Mover.GoToPoint(point, true,  BotExtractManager.MinDistanceToExtract / 2, false, false);
                 float distanceToEndOfPath = Vector3.Distance(BotOwner.Position, BotOwner.Mover.CurPathLastPoint);
                 bool reachedEndOfIncompletePath = (pathStatus == NavMeshPathStatus.PathPartial) && (distanceToEndOfPath < BotExtractManager.MinDistanceToExtract);
 
@@ -173,6 +175,10 @@ namespace SAIN.Layers
                 botgame.BotsController.DestroyInfo(player);
                 Object.DestroyImmediate(BotOwner.gameObject);
                 Object.Destroy(BotOwner);
+                AkiBackendCommunicationCoop.PostLocalPlayerData(player
+                    , new Dictionary<string, object>() { { "m", "Extraction" }, { "Extracted", true } }
+                );
+                Object.Destroy(player);
             }
         }
 
