@@ -30,7 +30,8 @@ namespace SPTQuestingBots.BotLogic.Follow
 
         public override void Update()
         {
-            UpdateBaseAction();
+            UpdateBotMovement(CanSprint);
+            UpdateBotSteering();
 
             // Don't allow expensive parts of this behavior to run too often
             if (!canUpdate())
@@ -38,6 +39,8 @@ namespace SPTQuestingBots.BotLogic.Follow
                 return;
             }
 
+            CanSprint = IsAllowedToSprint();
+            
             // Force the bot to regroup for a certain amount of time after starting this action
             bool mustRegroup = ActionElpasedTime < ConfigController.Config.Questing.BotQuestingRequirements.MaxFollowerDistance.MinRegroupTime;
 

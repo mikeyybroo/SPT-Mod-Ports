@@ -4,14 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EFT;
+using SPTQuestingBots.Controllers;
 
 namespace SPTQuestingBots.BotLogic.Objective
 {
     public class HoldAtObjectiveAction : BehaviorExtensions.GoToPositionAbstractAction
     {
+        private bool wasStuck = false;
+        private float maxWanderDistance = 5;
+
         public HoldAtObjectiveAction(BotOwner _BotOwner) : base(_BotOwner, 100)
         {
-            SetBaseAction(AIActionNodeAssigner.CreateNode(BotLogicDecision.holdPosition, BotOwner));
+            SetBaseAction(AIActionNodeAssigner.CreateNode(BotLogicDecision.search, BotOwner));
         }
 
         public override void Start()
@@ -19,6 +23,9 @@ namespace SPTQuestingBots.BotLogic.Objective
             base.Start();
 
             BotOwner.PatrollingData.Pause();
+            
+            BotOwner.Mover.Stop();
+            RestartActionElapsedTime();
         }
 
         public override void Stop()
@@ -45,16 +52,37 @@ namespace SPTQuestingBots.BotLogic.Objective
 
             ObjectiveManager.StartJobAssigment();
 
-            if (!ObjectiveManager.IsCloseToObjective())
+            // This doesn't really need to be updated every frame
+            CanSprint = IsAllowedToSprint();
+
+            if (checkIfBotIsStuck())
             {
-                RecalculatePath(ObjectiveManager.Position.Value);
-                RestartActionElapsedTime();
+                if (!wasStuck)
+                {
+                    ObjectiveManager.StuckCount++;
+                    LoggingController.LogInfo("Bot " + BotOwner.GetText() + " is stuck and will get a new objective.");
+                }
+                wasStuck = true;
+
+                if (ObjectiveManager.TryChangeObjective())
+                {
+                    restartStuckTimer();
+                }
+            }            
+            else
+            {
+                wasStuck = false;
             }
 
-            if (ActionElpasedTime >= ObjectiveManager.MinElapsedActionTime)
+            CheckMinElapsedActionTime();
+
+            if (!ObjectiveManager.IsCloseToObjective(maxWanderDistance))
             {
-                ObjectiveManager.CompleteObjective();
+                RecalculatePath(ObjectiveManager.Position.Value);
+                return;
             }
+
+            restartStuckTimer();
         }
     }
 }

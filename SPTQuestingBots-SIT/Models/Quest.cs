@@ -37,6 +37,9 @@ namespace SPTQuestingBots.Models
 
         [JsonProperty("priority")]
         public int Priority { get; set; } = 99;
+        
+        [JsonProperty("desirability")]
+        public float Desirability { get; set; } = -1;
 
         [JsonProperty("minRaidET")]
         public float MinRaidET { get; set; } = 0;
@@ -82,6 +85,16 @@ namespace SPTQuestingBots.Models
         public QuestQB(int priority) : this()
         {
             Priority = priority;
+        }
+        
+        public QuestQB(string _name) : this()
+        {
+            name = _name;
+        }
+
+        public QuestQB(Template2 template) : this()
+        {
+            Template = template;
         }
 
         public QuestQB(int priority, string _name): this(priority)

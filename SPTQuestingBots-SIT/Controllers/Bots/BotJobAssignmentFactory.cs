@@ -442,10 +442,18 @@ namespace SPTQuestingBots.Controllers.Bots
         public static BotJobAssignment GetNewBotJobAssignment(this BotOwner bot)
         {
             // Do not select another quest objective if the bot wants to extract
-            if (BotObjectiveManager.GetObjectiveManagerForBot(bot)?.DoesBotWantToExtract() == true)
+            BotObjectiveManager botObjectiveManager = BotObjectiveManager.GetObjectiveManagerForBot(bot);
+            if (botObjectiveManager?.DoesBotWantToExtract() == true)
             {
                 return null;
             }
+            
+            float? distanceToExfilPoint = botObjectiveManager?.DistanceToInitialExfiltrationPoint();
+            if (distanceToExfilPoint.HasValue && (distanceToExfilPoint.Value < LocationController.GetMaxExfilPointDistance() * 0.1))
+            {
+                botObjectiveManager?.SetExfiliationPoint();
+            }
+
 
             // Get the bot's most recent assingment if applicable
             QuestQB quest = null;
@@ -521,6 +529,89 @@ namespace SPTQuestingBots.Controllers.Bots
         }
 
         public static QuestQB GetRandomQuest(this BotOwner bot, IEnumerable<QuestQB> invalidQuests)
+                {
+            //return GetRandomQuest_OLD(bot, invalidQuests);
+
+            QuestQB[] assignableQuests = allQuests
+                .Where(q => !invalidQuests.Contains(q))
+                .Where(q => q.NumberOfValidObjectives > 0)
+                .Where(q => q.CanMoreBotsDoQuest())
+                //.Where(q => q.CanAssignToBot(bot))  // TODO: Fixme -> Workaround, if there are no quests available for bots, it may start throwing exceptions like no tomorrow.
+                .Where(q => q.Desirability != 0)
+                .ToArray();
+
+            foreach (QuestQB quest in assignableQuests)
+            {
+                if (quest.Desirability != -1)
+                {
+                    continue;
+                }
+
+                quest.Desirability = 100 * (1f - quest.Priority / 25f) * (quest.ChanceForSelecting / 100);
+            }
+
+            if (!assignableQuests.Any())
+            {
+                return null;
+            }
+
+            BotObjectiveManager botObjectiveManager = BotObjectiveManager.GetObjectiveManagerForBot(bot);
+            Vector3? vectorToExfil = botObjectiveManager?.VectorToInitialExfiltrationPoint();
+
+            Dictionary<QuestQB, Configuration.MinMaxConfig> questDistanceRanges = new Dictionary<QuestQB, Configuration.MinMaxConfig>();
+            Dictionary<QuestQB, Configuration.MinMaxConfig> questExfilAngleRanges = new Dictionary<QuestQB, Configuration.MinMaxConfig>();
+            foreach (QuestQB quest in assignableQuests)
+            {
+                IEnumerable<Vector3?> objectivePositions = quest.ValidObjectives.Select(o => o.GetFirstStepPosition());
+                IEnumerable<Vector3> validObjectivePositions = objectivePositions.Where(p => p.HasValue).Select(p => p.Value);
+                IEnumerable<float> distancesToObjectives = validObjectivePositions.Select(p => Vector3.Distance(bot.Position, p));
+
+                questDistanceRanges.Add(quest, new Configuration.MinMaxConfig(distancesToObjectives.Min(), distancesToObjectives.Max()));
+
+                if (vectorToExfil.HasValue)
+                {
+                    IEnumerable<Vector3> vectorsToObjectivePositions = validObjectivePositions.Select(p => p - bot.Position);
+                    IEnumerable<float> anglesToObjectives = vectorsToObjectivePositions.Select(p => Vector3.Angle(bot.Position, p));
+
+                    questExfilAngleRanges.Add(quest, new Configuration.MinMaxConfig(anglesToObjectives.Min(), anglesToObjectives.Max()));
+                }
+                else
+                {
+                    questExfilAngleRanges.Add(quest, new Configuration.MinMaxConfig(0, 0));
+                }
+            }
+
+            // Calculate the maximum amount of "randomness" to apply to each quest
+            //double distanceRange = questDistanceRanges.Max(q => q.Value.Max) - questDistanceRanges.Min(q => q.Value.Min);
+            double maxDistance = questDistanceRanges.Max(o => o.Value.Max);
+            int maxRandomDistance = (int)Math.Ceiling(maxDistance * ConfigController.Config.Questing.BotQuests.DistanceRandomness / 100.0);
+            int desirabilityRandomness = ConfigController.Config.Questing.BotQuests.DesirabilityRandomness;
+
+            float distanceRandomness = ConfigController.Config.Questing.BotQuests.DistanceRandomness;
+            float distanceWeighting = ConfigController.Config.Questing.BotQuests.DistanceWeighting;
+            float maxExfilAngle = 90;
+
+            System.Random random = new System.Random();
+            Dictionary<QuestQB, double> questDistanceFractions = questDistanceRanges
+                .ToDictionary(o => o.Key, o => 1 - (o.Value.Min + random.Next(-1 * maxRandomDistance, maxRandomDistance)) / maxDistance);
+            Dictionary<QuestQB, float> questDesirabilityFractions = questDistanceRanges
+                .ToDictionary(o => o.Key, o => (o.Key.Desirability + random.Next(-1 * desirabilityRandomness, desirabilityRandomness)) / 100);
+            Dictionary<QuestQB, double> questExfilAngleFactor = questExfilAngleRanges
+                .ToDictionary(o => o.Key, o => Math.Max(0, o.Value.Min - maxExfilAngle) / (180 - maxExfilAngle));
+
+            IEnumerable<QuestQB> sortedQuests = questDistanceRanges
+                .OrderBy(o => (questDistanceFractions[o.Key] * distanceWeighting) + questDesirabilityFractions[o.Key] - (questExfilAngleFactor[o.Key] * 0.5))
+                .Select(o => o.Key);
+
+            QuestQB selectedQuest = sortedQuests.Last();
+
+            LoggingController.LogInfo("Distance: " + questDistanceFractions[selectedQuest] + ", Desirability: " + questDesirabilityFractions[selectedQuest] + ", Exfil Angle Factor: " + questExfilAngleFactor[selectedQuest]);
+
+            return selectedQuest;
+        }
+
+        /*TODO: Isn't used and throws error on build
+        public static QuestQB GetRandomQuest_OLD(this BotOwner bot, IEnumerable<Quest> invalidQuests)
         {
             // Group all valid quests by their priority number in ascending order
             var groupedQuests = allQuests
@@ -583,7 +674,7 @@ namespace SPTQuestingBots.Controllers.Bots
 
             // If no quest was assigned to the bot, randomly assign a quest in the first priority group as a fallback method
             return groupedQuests.First().Quests.Random();
-        }
+        }*/
         
         public static IEnumerable<BotJobAssignment> GetCompletedOrAchivedQuests(this BotOwner bot)
         {

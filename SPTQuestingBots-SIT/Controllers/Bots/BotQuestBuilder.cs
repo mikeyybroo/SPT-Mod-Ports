@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Aki.Common.Http;
 using Comfort.Common;
 using EFT;
 using EFT.Game.Spawning;
@@ -119,8 +118,8 @@ namespace SPTQuestingBots.Controllers.Bots
 
                     foreach (Template2 questTemplate in allQuestTemplates)
                     {
-                        QuestQB quest = new QuestQB(ConfigController.Config.Questing.BotQuests.EFTQuests.Priority, questTemplate);
-                        quest.ChanceForSelecting = ConfigController.Config.Questing.BotQuests.EFTQuests.Chance;
+                        QuestQB quest = new QuestQB(questTemplate);
+                        QuestSettingsConfig.ApplyQuestSettingsFromConfig(quest, ConfigController.Config.Questing.BotQuests.EFTQuests);
                         quest.PMCsOnly = true;
                         BotJobAssignmentFactory.AddQuest(quest);
                     }
@@ -146,8 +145,8 @@ namespace SPTQuestingBots.Controllers.Bots
                 // Create quest objectives for all matching quest items found in the map
                 yield return BotJobAssignmentFactory.ProcessAllQuests(LocateQuestItems, allItems);
 
-                // Update the chance that bots will have keys for EFT quests
-                yield return BotJobAssignmentFactory.ProcessAllQuests(updateChancesOfBotsHavingKeys, ConfigController.Config.Questing.BotQuests.EFTQuests.ChanceOfHavingKeys);
+                // Update all other settings for EFT quests
+                yield return BotJobAssignmentFactory.ProcessAllQuests(updateEFTQuestObjectives);
 
                 // Create a quest where the bots wanders to various spawn points around the map. This was implemented as a stop-gap for maps with few other quests.
                 QuestQB spawnPointQuest = createSpawnPointQuest(LocationController.CurrentLocation.SpawnPointParams, "Spawn Point Wander", ConfigController.Config.Questing.BotQuests.SpawnPointWander);
@@ -606,7 +605,8 @@ namespace SPTQuestingBots.Controllers.Bots
                 {
                     LoggingController.LogInfo("Found trigger " + trigger.Id + " for quest: " + quest.Name + " - Adding plant time: " + plantTime.Value + "s");
 
-                    objective.AddStep(new QuestObjectiveStep(navMeshTargetPoint.Value, QuestAction.PlantItem, plantTime.Value));
+                    Configuration.MinMaxConfig plantTimeMinMax = new Configuration.MinMaxConfig(plantTime.Value, plantTime.Value);
+                    objective.AddStep(new QuestObjectiveStep(navMeshTargetPoint.Value, QuestAction.PlantItem, plantTimeMinMax));
                 }
 
                 // If the zone is large, allow twice as many bots to do the objective at the same time
@@ -629,13 +629,13 @@ namespace SPTQuestingBots.Controllers.Bots
             }
         }
 
-        private static void updateChancesOfBotsHavingKeys(Models.QuestQB quest, float chance)
+        private static void updateEFTQuestObjectives(Models.QuestQB quest)
         {
             foreach (QuestObjective objective in quest.AllObjectives)
             {
                 foreach (QuestObjectiveStep step in objective.AllSteps)
                 {
-                    step.ChanceOfHavingKey = chance;
+                    step.ChanceOfHavingKey = ConfigController.Config.Questing.BotQuests.EFTQuests.ChanceOfHavingKeys;
                 }
             }
         }
@@ -665,7 +665,7 @@ namespace SPTQuestingBots.Controllers.Bots
                 return null;
             }
 
-            Models.QuestQB quest = new Models.QuestQB(settings.Priority, questName);
+            Models.QuestQB quest = new Models.QuestQB(questName);
             QuestSettingsConfig.ApplyQuestSettingsFromConfig(quest, settings);
 
             Models.QuestObjective objective = new Models.QuestObjective(navMeshPosition.Value);
@@ -699,7 +699,7 @@ namespace SPTQuestingBots.Controllers.Bots
                 return null;
             }
 
-            Models.QuestQB quest = new Models.QuestQB(settings.Priority, questName);
+            Models.QuestQB quest = new Models.QuestQB(questName);
             QuestSettingsConfig.ApplyQuestSettingsFromConfig(quest, settings);
 
             foreach (SpawnPointParams spawnPoint in eligibleSpawnPoints)

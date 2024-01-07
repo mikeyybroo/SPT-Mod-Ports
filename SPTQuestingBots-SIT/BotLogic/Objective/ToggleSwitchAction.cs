@@ -94,7 +94,10 @@ namespace SPTQuestingBots.BotLogic.Objective
 
                 return;
             }
-
+            
+            // This doesn't really need to be updated every frame
+            CanSprint = IsAllowedToSprint();
+            
             // TO DO: Can this distance be reduced?
             float distanceToTargetPosition = Vector3.Distance(BotOwner.Position, ObjectiveManager.Position.Value);
             if (distanceToTargetPosition > 0.75f)

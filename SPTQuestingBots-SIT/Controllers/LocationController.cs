@@ -26,6 +26,7 @@ namespace SPTQuestingBots.Controllers
         private static Dictionary<string, EFT.Interactive.Switch> switches = new Dictionary<string, EFT.Interactive.Switch>();
         private static Dictionary<Door, bool> areLockedDoorsUnlocked = new Dictionary<Door, bool>();
         private static Dictionary<Door, Vector3> doorInteractionPositions = new Dictionary<Door, Vector3>();
+        private static float maxExfilPointDistance = 0;
 
         private static void Clear()
         {
@@ -35,6 +36,7 @@ namespace SPTQuestingBots.Controllers
             switches.Clear();
             areLockedDoorsUnlocked.Clear();
             doorInteractionPositions.Clear();
+            maxExfilPointDistance = 0;
         }
 
         private void Update()
@@ -113,11 +115,6 @@ namespace SPTQuestingBots.Controllers
             Door[] allDoors = FindObjectsOfType<Door>();
             foreach (Door door in allDoors)
             {
-                if (door.DoorState != EDoorState.Locked)
-                {
-                    continue;
-                }
-
                 if (!door.Operatable)
                 {
                     //LoggingController.LogInfo("Door " + door.Id + " is inoperable");
@@ -127,6 +124,11 @@ namespace SPTQuestingBots.Controllers
                 if (!door.CanBeBreached && (door.KeyId == ""))
                 {
                     //LoggingController.LogInfo("Door " + door.Id + " cannot be breached and has no valid key");
+                    continue;
+                }
+                
+                if (door.DoorState != EDoorState.Locked)
+                {
                     continue;
                 }
 
@@ -328,7 +330,11 @@ namespace SPTQuestingBots.Controllers
             }
 
             // The furthest spawn point from all reference positions is the one that has the furthest minimum distance to all of them
-            return nearestReferencePoints.OrderBy(p => p.Value).Last().Key;
+            KeyValuePair<SpawnPointParams, float> selectedPoint = nearestReferencePoints.OrderBy(p => p.Value).Last();
+
+            LoggingController.LogInfo("Found furthest spawn point " + selectedPoint.Key.Position.ToUnityVector3().ToString() + " that is " + selectedPoint.Value + "m from other players");
+
+            return selectedPoint.Key;
         }
 
         public static SpawnPointParams GetFurthestSpawnPoint(SpawnPointParams[] referenceSpawnPoints, SpawnPointParams[] allSpawnPoints)
@@ -480,6 +486,30 @@ namespace SPTQuestingBots.Controllers
             }
 
             return null;
+        }
+        
+        public static float GetMaxExfilPointDistance()
+        {
+            if (maxExfilPointDistance > 0)
+            {
+                return maxExfilPointDistance;
+            }
+
+            float maxDistance = 0;
+            foreach (ExfiltrationPoint firstPoint in Singleton<GameWorld>.Instance.ExfiltrationController.ExfiltrationPoints)
+            {
+                foreach (ExfiltrationPoint secondPoint in Singleton<GameWorld>.Instance.ExfiltrationController.ExfiltrationPoints)
+                {
+                    float distance = Vector3.Distance(firstPoint.transform.position, secondPoint.transform.position);
+                    if (distance > maxDistance)
+                    {
+                        maxDistance = distance;
+                    }
+                }
+            }
+
+            maxExfilPointDistance = maxDistance;
+            return maxExfilPointDistance;
         }
 
         private static LocationSettings getLocationSettings(TarkovApplication app)

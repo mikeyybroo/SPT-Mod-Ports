@@ -172,7 +172,22 @@ namespace SPTQuestingBots.BotLogic.Objective
                         setNextAction(BotActionType.GoToObjective, "GoToObjective");
                     }
                     return updatePreviousState(true);
+                
+                case QuestAction.HoldAtPosition:
+                    setNextAction(BotActionType.HoldPosition, "HoldPosition (" + objectiveManager.MinElapsedActionTime + "s)");
+                    return updatePreviousState(true);
 
+                case QuestAction.Ambush:
+                    if (!objectiveManager.IsCloseToObjective())
+                    {
+                        setNextAction(BotActionType.GoToObjective, "GoToAmbushPosition");
+                    }
+                    else
+                    {
+                        setNextAction(BotActionType.Ambush, "Ambush (" + objectiveManager.MinElapsedActionTime + "s)");
+                    }
+                    return updatePreviousState(true);
+                
                 case QuestAction.PlantItem:
                     if (!objectiveManager.IsCloseToObjective())
                     {

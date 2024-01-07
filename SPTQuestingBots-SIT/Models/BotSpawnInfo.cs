@@ -73,7 +73,11 @@ namespace SPTQuestingBots.Models
             {
                 return false;
             }
-
+            
+            LoggingController.LogInfo("Valid spawn points: " + validSpawnPoints.Length);
+            LoggingController.LogInfo("Main player position: " + Singleton<GameWorld>.Instance.MainPlayer.Position.ToString());
+            LoggingController.LogInfo("Existing player positions: " + string.Join(", ", playerPositions.Select(p => p.ToString())));
+            
             return true;
         }
 

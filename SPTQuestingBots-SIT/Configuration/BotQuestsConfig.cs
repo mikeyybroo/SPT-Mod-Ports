@@ -10,7 +10,13 @@ namespace SPTQuestingBots.Configuration
     public class BotQuestsConfig
     {
         [JsonProperty("distance_randomness")]
-        public float DistanceRandomness { get; set; } = 50;
+        public int DistanceRandomness { get; set; } = 50;
+
+        [JsonProperty("desirability_randomness")]
+        public int DesirabilityRandomness { get; set; } = 50;
+
+        [JsonProperty("distance_weighting")]
+        public float DistanceWeighting { get; set; } = 1;
         
         [JsonProperty("blacklisted_boss_hunter_bosses")]
         public string[] BlacklistedBossHunterBosses { get; set; } = new string[0];

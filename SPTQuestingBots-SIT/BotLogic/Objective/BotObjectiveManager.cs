@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using SPTQuestingBots.BotLogic.HiveMind;
 using SPTQuestingBots.Controllers;
 using SPTQuestingBots.Controllers.Bots;
@@ -22,9 +24,11 @@ namespace SPTQuestingBots.BotLogic.Objective
         public float PauseRequest { get; set; } = 0;
         public BotMonitor BotMonitor { get; private set; } = null;
         public EFT.Interactive.Door DoorToOpen { get; set; } = null;
+        public Vector3? LastCorner { get; set; } = null;
 
         private BotOwner botOwner = null;
         private BotJobAssignment assignment = null;
+        private ExfiltrationPoint exfiltrationPoint = null;
         private Stopwatch timeSpentAtObjectiveTimer = new Stopwatch();
 
         public Vector3? Position => assignment?.Position;
@@ -32,7 +36,7 @@ namespace SPTQuestingBots.BotLogic.Objective
         public bool HasCompletePath => assignment.HasCompletePath;
         public bool MustUnlockDoor => assignment?.DoorToUnlock != null;
         public QuestAction CurrentQuestAction => assignment?.QuestObjectiveStepAssignment?.ActionType ?? QuestAction.Undefined;
-        public double MinElapsedActionTime => assignment?.QuestObjectiveStepAssignment?.MinElapsedTime ?? 0;
+        public double MinElapsedActionTime => assignment?.MinElapsedTime ?? 0;
         public float ChanceOfHavingKey => assignment?.QuestObjectiveStepAssignment?.ChanceOfHavingKey ?? 0;
 
         public double TimeSpentAtObjective => timeSpentAtObjectiveTimer.ElapsedMilliseconds / 1000.0;
@@ -97,12 +101,16 @@ namespace SPTQuestingBots.BotLogic.Objective
             base.UpdateInterval = 200;
             botOwner = _botOwner;
             
-            if (BotMonitor != null)
+            if (BotMonitor == null)
             {
                 return;
+                BotMonitor = new BotMonitor(botOwner);
             }
             
-            BotMonitor = new BotMonitor(botOwner);
+            if (exfiltrationPoint == null)
+            {
+                SetExfiliationPoint();
+            }
 
         }
 
@@ -207,6 +215,7 @@ namespace SPTQuestingBots.BotLogic.Objective
         public void CompleteObjective()
         {
             assignment.Complete();
+            UpdateLootingBehavior(assignment.QuestObjectiveAssignment.LootAfterCompletingSetting);
 
             StuckCount = 0;
         }
@@ -277,6 +286,11 @@ namespace SPTQuestingBots.BotLogic.Objective
 
         public bool IsAllowedToTakeABreak()
         {
+            if ((CurrentQuestAction == QuestAction.HoldAtPosition) || (CurrentQuestAction == QuestAction.Ambush))
+            {
+                return false;
+            }
+            
             if ((CurrentQuestAction == QuestAction.PlantItem) && IsCloseToObjective())
             {
                 return false;
@@ -314,6 +328,56 @@ namespace SPTQuestingBots.BotLogic.Objective
             }
 
             return false;
+        }
+        
+        public void UpdateLootingBehavior(LootAfterCompleting behavior)
+        {
+            switch (behavior)
+            {
+                case LootAfterCompleting.Force:
+                    BotMonitor.TryForceBotToLootNow(5);
+                    break;
+                case LootAfterCompleting.Inhibit:
+                    BotMonitor.TryPreventBotFromLooting(10);
+                    break;
+            }
+        }
+
+        public void SetExfiliationPoint()
+        {
+            Dictionary<ExfiltrationPoint, float> exfiltrationPointDistances = Singleton<GameWorld>.Instance.ExfiltrationController.ExfiltrationPoints
+                .ToDictionary(p => p, p => Vector3.Distance(p.transform.position, botOwner.Position));
+
+            if (exfiltrationPointDistances.Count > 0)
+            {
+                KeyValuePair<ExfiltrationPoint, float> furthestPoint = exfiltrationPointDistances
+                    .OrderBy(p => p.Value)
+                    .Last();
+
+                exfiltrationPoint = furthestPoint.Key;
+
+                LoggingController.LogInfo(botOwner.GetText() + " has selected " + furthestPoint.Key.Settings.Name + " as its furthest exfil point (" + furthestPoint.Value + "m)");
+            }
+        }
+
+        public float? DistanceToInitialExfiltrationPoint()
+        {
+            if (exfiltrationPoint == null)
+            {
+                return null;
+            }
+
+            return Vector3.Distance(botOwner.Position, exfiltrationPoint.transform.position);
+        }
+
+        public Vector3? VectorToInitialExfiltrationPoint()
+        {
+            if (exfiltrationPoint == null)
+            {
+                return null;
+            }
+
+            return exfiltrationPoint.transform.position - botOwner.Position;
         }
     }
 }

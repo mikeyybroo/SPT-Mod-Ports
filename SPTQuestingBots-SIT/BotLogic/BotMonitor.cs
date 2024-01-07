@@ -26,6 +26,7 @@ namespace SPTQuestingBots.BotLogic
         private bool wasLooting = false;
         private bool hasFoundLoot = false;
         private bool canUseSAINInterop = false;
+        private bool canUseLootingBotsInterop = false;
         private int minTotalQuestsForExtract = int.MaxValue;
         private int minEFTQuestsForExtract = int.MaxValue;
 
@@ -50,6 +51,15 @@ namespace SPTQuestingBots.BotLogic
             else
             {
                 LoggingController.LogWarning("SAIN Interop not detected. Cannot instruct " + botOwner.GetText() + " to extract.");
+            }
+            
+            if (LootingBots.LootingBotsInterop.Init())
+            {
+                canUseLootingBotsInterop = true;
+            }
+            else
+            {
+                LoggingController.LogWarning("Looting Bots Interop not detected. Cannot instruct " + botOwner.GetText() + " to loot.");
             }
         }
 
@@ -114,8 +124,61 @@ namespace SPTQuestingBots.BotLogic
 
             return false;
         }
+        public bool TryPreventBotFromLooting(float duration)
+        {
+            if (!canUseLootingBotsInterop)
+            {
+                //LoggingController.LogWarning("Looting Bots Interop not detected");
+                return false;
+            }
+
+            if (LootingBots.LootingBotsInterop.TryPreventBotFromLooting(botOwner, duration))
+            {
+                LoggingController.LogInfo("Preventing " + botOwner.GetText() + " from looting");
+
+                return true;
+            }
+            else
+            {
+                LoggingController.LogError("Cannot prevent " + botOwner.GetText() + " from looting. Looting Bots Interop not initialized properly.");
+            }
+
+            return false;
+        }
+
+        public bool TryForceBotToLootNow(float duration)
+        {
+            if (!canUseLootingBotsInterop)
+            {
+                //LoggingController.LogWarning("Looting Bots Interop not detected");
+                return false;
+            }
+
+            if (canUseSAINInterop && !SAIN.Plugin.SAINInterop.TryResetDecisionsForBot(botOwner))
+            {
+                LoggingController.LogError("Cannot instruct " + botOwner.GetText() + " to reset its decisions. SAIN Interop not initialized properly.");
+            }
+
+            if (LootingBots.LootingBotsInterop.TryForceBotToLootNow(botOwner, duration))
+            {
+                LoggingController.LogInfo("Instructing " + botOwner.GetText() + " to loot now");
+
+                // Need to reset these or bots may crouch-walk for a long distance
+                // TODO: This doesn't seem to work. Maybe Looting Bots is forcing this behavior?
+                botOwner.SetPose(1f);
+                botOwner.SetTargetMoveSpeed(1f);
+
+                return true;
+            }
+            else
+            {
+                LoggingController.LogError("Cannot instruct " + botOwner.GetText() + " to loot. Looting Bots Interop not initialized properly.");
+            }
+
+            return false;
+        }
         
-                public bool TryInstructBotToExtract()
+        public bool TryInstructBotToExtract()
         {
             if (!canUseSAINInterop)
             {

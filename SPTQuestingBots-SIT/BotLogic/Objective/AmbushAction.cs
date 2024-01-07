@@ -1,17 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EFT;
+using UnityEngine;
 
 namespace SPTQuestingBots.BotLogic.Objective
 {
-    public class PlantItemAction : BehaviorExtensions.GoToPositionAbstractAction
+    public class AmbushAction : BehaviorExtensions.GoToPositionAbstractAction
     {
-        public PlantItemAction(BotOwner _BotOwner) : base(_BotOwner, 100)
+        public AmbushAction(BotOwner _BotOwner) : base(_BotOwner, 100)
         {
-            SetBaseAction(AIActionNodeAssigner.CreateNode(BotLogicDecision.lay, BotOwner));
+            SetBaseAction(AIActionNodeAssigner.CreateNode(BotLogicDecision.holdPosition, BotOwner));
         }
 
         public override void Start()
@@ -19,6 +20,8 @@ namespace SPTQuestingBots.BotLogic.Objective
             base.Start();
 
             BotOwner.PatrollingData.Pause();
+
+            RestartActionElapsedTime();
         }
 
         public override void Stop()
@@ -31,7 +34,7 @@ namespace SPTQuestingBots.BotLogic.Objective
         public override void Update()
         {
             UpdateBaseAction();
-            
+
             // Don't allow expensive parts of this behavior to run too often
             if (!canUpdate())
             {
@@ -44,20 +47,19 @@ namespace SPTQuestingBots.BotLogic.Objective
             }
 
             ObjectiveManager.StartJobAssigment();
-            
+
             // This doesn't really need to be updated every frame
             CanSprint = IsAllowedToSprint();
+
+            CheckMinElapsedActionTime();
 
             if (!ObjectiveManager.IsCloseToObjective())
             {
                 RecalculatePath(ObjectiveManager.Position.Value);
-                UpdateBotSteering();
-                RestartActionElapsedTime();
-
                 return;
             }
+
             restartStuckTimer();
-            CheckMinElapsedActionTime();
 
             TryLookToLastCorner();
         }

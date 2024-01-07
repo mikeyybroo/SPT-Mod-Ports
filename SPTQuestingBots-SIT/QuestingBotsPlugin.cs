@@ -14,7 +14,7 @@ namespace SPTQuestingBots
     [BepInIncompatibility("com.pandahhcorp.aidisabler")]
     [BepInIncompatibility("com.dvize.AILimit")]
     //TODO: add requirement for SIT
-    [BepInPlugin("com.DanW.QuestingBots", "DanW-QuestingBots", "0.3.5")]
+    [BepInPlugin("com.DanW.QuestingBots", "DanW-QuestingBots", "0.4.0")]
     public class QuestingBotsPlugin : BaseUnityPlugin
     {
         public static string ModName { get; private set; } = "???";

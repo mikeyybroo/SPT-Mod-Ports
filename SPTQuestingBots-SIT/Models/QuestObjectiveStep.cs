@@ -15,9 +15,11 @@ namespace SPTQuestingBots.Models
     {
         Undefined = 0,
         MoveToPosition = 1,
-        PlantItem = 2,
-        ToggleSwitch = 3,
-        RequestExtract = 4,
+        HoldAtPosition = 2,
+        Ambush = 3,
+        PlantItem = 4,
+        ToggleSwitch = 5,
+        RequestExtract = 6,
     }
 
     public class QuestObjectiveStep
@@ -33,10 +35,13 @@ namespace SPTQuestingBots.Models
         public QuestAction ActionType { get; set; } = QuestAction.MoveToPosition;
 
         [JsonProperty("minElapsedTime")]
-        public double MinElapsedTime { get; set; } = 0;
+        public Configuration.MinMaxConfig MinElapsedTime { get; set; } = new Configuration.MinMaxConfig(5, 5);
 
         [JsonProperty("switchID")]
         public string SwitchID { get; set; } = "";
+        
+        [JsonProperty("maxWanderDistance")]
+        public float MaxWanderDistance { get; set; } = 5;
 
         [JsonProperty("chanceOfHavingKey")]
         public float ChanceOfHavingKey { get; set; } = ConfigController.Config.Questing.UnlockingDoors.DefaultChanceOfBotsHavingKeys;
@@ -67,7 +72,7 @@ namespace SPTQuestingBots.Models
             ActionType = actionType;
         }
 
-        public QuestObjectiveStep(Vector3 position, QuestAction actionType, double minElapsedTime) : this(position, actionType)
+        public QuestObjectiveStep(Vector3 position, QuestAction actionType, Configuration.MinMaxConfig minElapsedTime) : this(position, actionType)
         {
             MinElapsedTime = minElapsedTime;
         }
@@ -121,6 +126,12 @@ namespace SPTQuestingBots.Models
 
             InteractiveObject = LocationController.FindSwitch(SwitchID);
             return InteractiveObject != null;
+        }
+        
+        public double GetRandomMinElapsedTime()
+        {
+            System.Random random = new System.Random();
+            return MinElapsedTime.Min + ((MinElapsedTime.Max - MinElapsedTime.Min) * random.NextDouble());
         }
     }
 }
