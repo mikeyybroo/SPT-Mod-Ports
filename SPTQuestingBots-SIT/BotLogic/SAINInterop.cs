@@ -28,7 +28,10 @@ namespace SAIN.Plugin
             if (!_SAINLoadedChecked)
             {
                 _SAINLoadedChecked = true;
-                _IsSAINLoaded = Chainloader.PluginInfos.ContainsKey("me.sol.sain");
+                if (Chainloader.PluginInfos.ContainsKey("me.sol.sain"))
+                {
+                    _IsSAINLoaded = true;
+                }
             }
 
             return _IsSAINLoaded;
