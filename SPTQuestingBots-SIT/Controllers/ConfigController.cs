@@ -45,14 +45,22 @@ namespace SPTQuestingBots.Controllers
             }
 
             string errorMessage = "Cannot retrieve logging path from the server. Falling back to using the current directory.";
-            string json = RequestHandler.GetJson("/QuestingBots/GetLoggingPath");
 
-            if (TryDeserializeObject(json, errorMessage, out Configuration.LoggingPath _path))
+            try
             {
-                LoggingPath = _path.Path;
+                string json = RequestHandler.GetJson("/QuestingBots/GetLoggingPath");
+                if (TryDeserializeObject(json, errorMessage, out Configuration.LoggingPath _path))
+                {
+                    LoggingPath = _path.Path;
+                }
+                else
+                {
+                    LoggingPath = Assembly.GetExecutingAssembly().Location;
+                }
             }
-            else
+            catch (Exception e)
             {
+                //Console.WriteLine(e);
                 LoggingPath = Assembly.GetExecutingAssembly().Location;
             }
 
