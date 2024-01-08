@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Aki.Custom.Airdrops;
+using Comfort.Common;
 using StayInTarkov.AkiSupport.Airdrops;
 using StayInTarkov;
 
@@ -19,7 +21,9 @@ namespace SPTQuestingBots.Patches
         [PatchPostfix]
         private static void PatchPostfix(AirdropBox __instance)
         {
-            Controllers.Bots.BotQuestBuilder.AddAirdropChaserQuest(__instance.transform.position);
+            if (Singleton<SITAirdropsManager>.Instance.AirdropBox &&
+                Singleton<SITAirdropsManager>.Instance.AirdropBox.enabled &&
+                Singleton<SITAirdropsManager>.Instance.AirdropBox.gameObject) Controllers.Bots.BotQuestBuilder.AddAirdropChaserQuest(Singleton<SITAirdropsManager>.Instance.AirdropBox.transform.position);
         }
     }
 }
