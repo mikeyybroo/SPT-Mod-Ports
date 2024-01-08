@@ -11,6 +11,7 @@ using SPTQuestingBots.BotLogic.Objective;
 using SPTQuestingBots.Models;
 using Comfort.Common;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SPTQuestingBots.Controllers.Bots
 {
@@ -522,11 +523,35 @@ namespace SPTQuestingBots.Controllers.Bots
 
         public static QuestQB GetRandomQuest(this BotOwner bot, IEnumerable<QuestQB> invalidQuests)
         {
+            NavMeshPath Path = new NavMeshPath();
             // Group all valid quests by their priority number in ascending order
             var groupedQuests = allQuests
                 .Where(q => !invalidQuests.Contains(q))
                 .Where(q => q.NumberOfValidObjectives > 0)
                 .Where(q => q.CanMoreBotsDoQuest())
+                .Where(q =>
+                {
+                    bool validQuest = false;
+                    foreach (var objective in q.ValidObjectives)
+                    {
+                        var objectivePosition = objective.GetFirstStepPosition();
+                        if (objectivePosition.HasValue)
+                        {
+                            Vector3 position = objectivePosition.Value;
+                            NavMesh.CalculatePath(bot.Position, (Vector3)position, -1, Path);
+                            if (Path.status == NavMeshPathStatus.PathComplete)
+                            {
+                                validQuest = true;
+                            }
+                            q.TryRemoveObjective(objective);
+                        }
+                    }
+                    if (validQuest == false)
+                    {
+                        allQuests.Remove(q);
+                    }
+                    return validQuest;
+                })
                 // .Where(q => q.CanAssignToBot(bot)) // TODO: Fixme -> Workaround, if there are no quests available for bots, it may start throwing exceptions like no tomorrow.
                 .GroupBy
                 (
