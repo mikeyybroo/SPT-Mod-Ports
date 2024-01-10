@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
@@ -11,7 +10,6 @@ using Systems.Effects;
 using EFT.Interactive;
 using System.Linq;
 using SAIN.Components.BotController;
-using StayInTarkov.Coop.Web;
 using UnityEngine.AI;
 
 namespace SAIN.Layers
