@@ -175,10 +175,6 @@ namespace SAIN.Layers
                 botgame.BotsController.DestroyInfo(player);
                 Object.DestroyImmediate(BotOwner.gameObject);
                 Object.Destroy(BotOwner);
-                AkiBackendCommunicationCoop.PostLocalPlayerData(player
-                    , new Dictionary<string, object>() { { "m", "Extraction" }, { "Extracted", true } }
-                );
-                Object.Destroy(player);
             }
         }
 
