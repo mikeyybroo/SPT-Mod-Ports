@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,25 @@ namespace SPTQuestingBots.BotLogic.Sleep
 {
     internal class SleepingLayer : BehaviorExtensions.CustomLayerDelayedUpdate
     {
+        
+        public ConcurrentDictionary<string, Player> Players { get; } = new();
+        public IEnumerable<Player> PlayerUsers
+        {
+            get
+            {
+                if (Players != null)
+                {
+                    var keys = Players.Keys.Where(x => x.StartsWith("pmc")).ToArray();
+                    foreach (var key in keys)
+                        yield return Players[key];
+                }
+                else
+                {
+                    yield return null;
+                }
+            }
+        }
+        
         private bool useLayer = false;
         private Objective.BotObjectiveManager objectiveManager = null;
 
@@ -79,17 +99,33 @@ namespace SPTQuestingBots.BotLogic.Sleep
             }
 
             // Ensure you're not dead
+            // Add support for multiple PMCs
+            if (!PlayerUsers.Any())
+            {
+                return updateUseLayer(false);
+            }
+            /*
             Player you = Singleton<GameWorld>.Instance.MainPlayer;
             if (you == null)
             {
                 return updateUseLayer(false);
-            }
+            }*/
+            
 
             // If the bot is close to you, don't allow it to sleep
+            // Add support for multiple PMCs
+            foreach (var eachPlayer in PlayerUsers)
+            {
+                if (Vector3.Distance(BotOwner.Position, eachPlayer.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToPMCs.Value)
+                {
+                    return updateUseLayer(false);
+                }
+            }
+            /*
             if (Vector3.Distance(BotOwner.Position, you.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value)
             {
                 return updateUseLayer(false);
-            }
+            }*/
 
             // Enumerate all other bots on the map that are alive and active
             IEnumerable<BotOwner> allOtherBots = Singleton<IBotGame>.Instance.BotsController.Bots.BotOwners
