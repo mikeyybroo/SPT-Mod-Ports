@@ -31,7 +31,7 @@ namespace SPTQuestingBots
             {
                 LoggingController.LogInfo("Loading QuestingBots...enabling patches and controllers...");
 
-                new Patches.CheckSPTVersionPatch().Enable();
+                //new Patches.CheckSPTVersionPatch().Enable();
                 new Patches.GameWorldOnDestroyPatch().Enable();
                 new Patches.OnGameStartedPatch().Enable();
                 new Patches.BotOwnerBrainActivatePatch().Enable();
