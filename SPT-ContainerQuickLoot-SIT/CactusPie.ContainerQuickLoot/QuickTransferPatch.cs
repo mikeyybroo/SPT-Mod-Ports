@@ -22,7 +22,7 @@ namespace CactusPie.ContainerQuickLoot
 
         [PatchPrefix]
         public static bool PatchPrefix(
-            ref SOperationResult2<IPopNewAmmoResult> __result,
+            ref SOperationResult1<IPopNewAmmoResult> __result,
             object __instance,
             Item item,
             ItemController controller,
@@ -103,8 +103,8 @@ namespace CactusPie.ContainerQuickLoot
                             continue;
                         }
 
-                        SOperationResult2<PopNewAmmoResult> mergeResult = ItemMovementHandler.Merge(item, containedItem.Key, controller, simulate);
-                        __result = new SOperationResult2<IPopNewAmmoResult>(mergeResult.Value);
+                        SOperationResult1<OperationResult7> mergeResult = ItemMovementHandler.Merge(item, containedItem.Key, controller, simulate);
+                        __result = new SOperationResult1<IPopNewAmmoResult>(mergeResult.Value);
                         return false;
                     }
                 }
@@ -116,7 +116,7 @@ namespace CactusPie.ContainerQuickLoot
                     continue;
                 }
 
-                SOperationResult2<MoveOldMagResult> moveResult = ItemMovementHandler.Move(item, location, controller, simulate);
+                SOperationResult1<MoveOldMagResult> moveResult = ItemMovementHandler.Move(item, location, controller, simulate);
                 if (moveResult.Failed)
                 {
                     return true;
