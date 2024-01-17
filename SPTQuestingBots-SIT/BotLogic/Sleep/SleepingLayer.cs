@@ -38,7 +38,6 @@ namespace SPTQuestingBots.BotLogic.Sleep
         public override bool IsActive()
         {
             var playerList = Singleton<GameWorld>.Instance.AllAlivePlayersList.FindAll(x => x != null && x.ProfileId.StartsWith("pmc"));
-            var numberOfPlayersAlive = playerList.Count;
             // Check if AI limiting is enabled in the F12 menu
             if (!QuestingBotsPluginConfig.SleepingEnabled.Value)
             {
