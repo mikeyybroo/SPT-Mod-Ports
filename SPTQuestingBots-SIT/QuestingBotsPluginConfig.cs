@@ -32,6 +32,7 @@ namespace SPTQuestingBots
         public static ConfigEntry<bool> SprintingEnabled;
 
         public static ConfigEntry<bool> SleepingEnabled;
+        public static ConfigEntry<bool> StreetsMode;
         public static ConfigEntry<bool> SleepingEnabledForQuestingBots;
         public static ConfigEntry<int> SleepingMinDistanceToYou;
         public static ConfigEntry<int> SleepingMinDistanceToPMCs;
@@ -57,6 +58,8 @@ namespace SPTQuestingBots
             SprintingEnabled = Config.Bind("Main", "Allow Bots to Sprint while Questing",
                 true, "Allow bots to sprint while questing. This does not affect their ability to sprint when they're not questing.");
 
+            StreetsMode = Config.Bind("Streets Mode", "Special Streets Limiting Mode",
+                true, "Streets will always be AI limited, regardless of the settings below. It will also be limited to 200m range.");
             SleepingEnabled = Config.Bind("AI Limiter", "Enable AI Limiting",
                 false, "Improve FPS by minimizing CPU load for AI out of certain ranges");
             SleepingEnabledForQuestingBots = Config.Bind("AI Limiter", "Enable AI Limiting for Bots That Are Questing",

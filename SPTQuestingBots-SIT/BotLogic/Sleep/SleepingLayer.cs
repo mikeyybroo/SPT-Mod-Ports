@@ -37,13 +37,24 @@ namespace SPTQuestingBots.BotLogic.Sleep
 
         public override bool IsActive()
         {
-            var playerList = Singleton<GameWorld>.Instance.AllAlivePlayersList.FindAll(x => x != null);
-            var humanPlayers = playerList.Where(x => x.ProfileId.StartsWith("pmc")).ToList();
+            // Streets is hard capped at 200m range
+            var sleepDistance = QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value;
+            var force = false;
+            if (Controllers.LocationController.CurrentLocation?.Name == "TarkovStreets" && QuestingBotsPluginConfig.StreetsMode.Value)
+            {
+                force = true;
+                if (sleepDistance > 200) sleepDistance = 200;
+            }
+            
             // Check if AI limiting is enabled in the F12 menu
-            if (!QuestingBotsPluginConfig.SleepingEnabled.Value)
+            if (!QuestingBotsPluginConfig.SleepingEnabled.Value || force)
             {
                 return updateUseLayer(false);
             }
+            
+            // Get playerlist and human players
+            var playerList = Singleton<GameWorld>.Instance.AllAlivePlayersList.FindAll(x => x != null);
+            var humanPlayers = playerList.Where(x => x.ProfileId.StartsWith("pmc")).ToList();
 
             // Don't run this method too often or performance will be impacted (ironically)
             if (!canUpdate())
@@ -98,7 +109,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
             // Add support for multiple PMCs
             foreach (var eachPlayer in humanPlayers)
             {
-                if (Vector3.Distance(BotOwner.Position, eachPlayer.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value)
+                if (Vector3.Distance(BotOwner.Position, eachPlayer.Position) < sleepDistance)
                 {
                     return updateUseLayer(false);
                 }
@@ -107,7 +118,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
             if (Vector3.Distance(BotOwner.Position, you.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value)
             {
                 return updateUseLayer(false);
-            }*/
+            }
 
             // Enumerate all other bots on the map that are alive and active
             IEnumerable<Player> allOtherBots = playerList
@@ -141,7 +152,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
                 {
                     return updateUseLayer(false);
                 }
-            }
+            }*/
 
             setNextAction(BehaviorExtensions.BotActionType.Sleep, "Sleep");
             return updateUseLayer(true);
