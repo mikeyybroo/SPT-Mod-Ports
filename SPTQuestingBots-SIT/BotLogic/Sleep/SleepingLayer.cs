@@ -37,7 +37,8 @@ namespace SPTQuestingBots.BotLogic.Sleep
 
         public override bool IsActive()
         {
-            var playerList = Singleton<GameWorld>.Instance.AllAlivePlayersList.FindAll(x => x != null && x.ProfileId.StartsWith("pmc"));
+            var playerList = Singleton<GameWorld>.Instance.AllAlivePlayersList.FindAll(x => x != null);
+            var humanPlayers = playerList.Where(x => x.ProfileId.StartsWith("pmc")).ToList();
             // Check if AI limiting is enabled in the F12 menu
             if (!QuestingBotsPluginConfig.SleepingEnabled.Value)
             {
@@ -82,7 +83,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
 
             // Ensure you're not dead
             // Add support for multiple PMCs
-            if (!playerList.Any())
+            if (!humanPlayers.Any())
             {
                 return updateUseLayer(false);
             }
@@ -95,7 +96,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
 
             // If the bot is close to you, don't allow it to sleep
             // Add support for multiple PMCs
-            foreach (var eachPlayer in playerList)
+            foreach (var eachPlayer in humanPlayers)
             {
                 if (Vector3.Distance(BotOwner.Position, eachPlayer.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value)
                 {
@@ -109,13 +110,11 @@ namespace SPTQuestingBots.BotLogic.Sleep
             }*/
 
             // Enumerate all other bots on the map that are alive and active
-            IEnumerable<BotOwner> allOtherBots = Singleton<IBotGame>.Instance.BotsController.Bots.BotOwners
-                .Where(b => b.BotState == EBotState.Active)
-                .Where(b => !b.IsDead)
-                .Where(b => b.gameObject.activeSelf)
+            IEnumerable<Player> allOtherBots = playerList
+                .Where(b => !b.ProfileId.StartsWith("pmc"))
                 .Where(b => b.Id != BotOwner.Id);
 
-            foreach (BotOwner bot in allOtherBots)
+            foreach (Player bot in allOtherBots)
             {
                 // We only care about other bots that can quest
                 Objective.BotObjectiveManager otherBotObjectiveManager = bot.GetPlayer.gameObject.GetComponent<Objective.BotObjectiveManager>();
