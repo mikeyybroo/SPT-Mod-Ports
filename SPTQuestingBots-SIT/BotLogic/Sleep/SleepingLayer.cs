@@ -12,25 +12,6 @@ namespace SPTQuestingBots.BotLogic.Sleep
 {
     internal class SleepingLayer : BehaviorExtensions.CustomLayerDelayedUpdate
     {
-        
-        public ConcurrentDictionary<string, Player> Players { get; } = new();
-        public IEnumerable<Player> PlayerUsers
-        {
-            get
-            {
-                if (Players != null)
-                {
-                    var keys = Players.Keys.Where(x => x.StartsWith("pmc")).ToArray();
-                    foreach (var key in keys)
-                        yield return Players[key];
-                }
-                else
-                {
-                    yield return null;
-                }
-            }
-        }
-        
         private bool useLayer = false;
         private Objective.BotObjectiveManager objectiveManager = null;
 
@@ -56,6 +37,8 @@ namespace SPTQuestingBots.BotLogic.Sleep
 
         public override bool IsActive()
         {
+            var playerList = Singleton<GameWorld>.Instance.AllAlivePlayersList.FindAll(x => x != null && x.ProfileId.StartsWith("pmc"));
+            var numberOfPlayersAlive = playerList.Count;
             // Check if AI limiting is enabled in the F12 menu
             if (!QuestingBotsPluginConfig.SleepingEnabled.Value)
             {
@@ -100,7 +83,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
 
             // Ensure you're not dead
             // Add support for multiple PMCs
-            if (!PlayerUsers.Any())
+            if (!playerList.Any())
             {
                 return updateUseLayer(false);
             }
@@ -110,13 +93,12 @@ namespace SPTQuestingBots.BotLogic.Sleep
             {
                 return updateUseLayer(false);
             }*/
-            
 
             // If the bot is close to you, don't allow it to sleep
             // Add support for multiple PMCs
-            foreach (var eachPlayer in PlayerUsers)
+            foreach (var eachPlayer in playerList)
             {
-                if (Vector3.Distance(BotOwner.Position, eachPlayer.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToPMCs.Value)
+                if (Vector3.Distance(BotOwner.Position, eachPlayer.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value)
                 {
                     return updateUseLayer(false);
                 }
