@@ -57,7 +57,6 @@ namespace DrakiaXYZ.QuestTracker
             _getColorMethod = AccessTools.GetDeclaredMethods(notesTaskType).Single(x => x.ReturnType == typeof(Color));
             _questListItemUpdateViewMethod = AccessTools.Method(typeof(QuestListItem), "UpdateView");
 
-            new PatchCoopInOutdatedVersion().Enable();
             new MainMenuControllerShowScreenPatch().Enable();
             new NewGamePatch().Enable();
 
@@ -427,31 +426,16 @@ namespace DrakiaXYZ.QuestTracker
      */
     internal class NewGamePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(GameWorld).GetMethod(nameof(GameWorld.OnGameStarted));
+        protected override MethodBase GetTargetMethod()
+        {
+            //return typeof(GameWorld).GetMethod(nameof(GameWorld.OnGameStarted));
+            return typeof(BotsController).GetMethod("Init");
+        }
 
         [PatchPrefix]
         public static void PatchPrefix()
         {
-            throw new Exception("AHHHHHHHHHHHHHHHHH");
             QuestTrackerComponent.Enable();
-        }
-    }
-    
-    // Credit to https://github.com/hickorysb/SPT-Minimap/blob/master/src/CactusPie.MapLocation/Patches/PatchCoopInOutdatedVersion.cs
-    public sealed class PatchCoopInOutdatedVersion : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(CoopGame).GetMethod(nameof(CoopGame.vmethod_4));
-        }
-
-        [PatchPostfix]
-        public static void Postfix()
-        {
-            if (Type.GetType("StayInTarkov.Coop.TarkovApplication_LocalGameCreator_Patch") == null)
-            {
-                Singleton<GameWorld>.Instance.OnGameStarted();
-            }
         }
     }
 }
