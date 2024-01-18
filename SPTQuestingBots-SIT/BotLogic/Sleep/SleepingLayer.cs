@@ -37,17 +37,23 @@ namespace SPTQuestingBots.BotLogic.Sleep
 
         public override bool IsActive()
         {
-            // Streets is hard capped at 200m range
-            var sleepDistance = QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value;
-            var force = false;
-            if (Controllers.LocationController.CurrentLocation?.Name == "TarkovStreets" && QuestingBotsPluginConfig.StreetsMode.Value)
+            // Don't run this method too often or performance will be impacted (ironically)
+            if (!canUpdate())
             {
-                force = true;
+                return useLayer;
+            }
+            
+            // Streets is hard capped at 200m range if enabled
+            var sleepDistance = QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value;
+            var forceStreets = false;
+            if (Controllers.LocationController.CurrentLocation?.Id == "TarkovStreets" && QuestingBotsPluginConfig.StreetsMode.Value)
+            {
+                forceStreets = true;
                 if (sleepDistance > 200) sleepDistance = 200;
             }
             
             // Check if AI limiting is enabled in the F12 menu
-            if (!QuestingBotsPluginConfig.SleepingEnabled.Value || force)
+            if (!QuestingBotsPluginConfig.SleepingEnabled.Value && !forceStreets)
             {
                 return updateUseLayer(false);
             }
@@ -56,12 +62,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
             var playerList = Singleton<GameWorld>.Instance.AllAlivePlayersList.FindAll(x => x != null);
             var humanPlayers = playerList.Where(x => x.ProfileId.StartsWith("pmc")).ToList();
 
-            // Don't run this method too often or performance will be impacted (ironically)
-            if (!canUpdate())
-            {
-                return useLayer;
-            }
-
+            // Check if the bot is active and alive
             if ((BotOwner.BotState != EBotState.Active) || BotOwner.IsDead)
             {
                 return updatePreviousState(false);
@@ -85,7 +86,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
                 // If the bot can quest and is allowed to sleep, ensure it's allowed to sleep on the current map
                 if (QuestingBotsPluginConfig.TarkovMapIDToEnum.TryGetValue(Controllers.LocationController.CurrentLocation?.Id, out TarkovMaps map))
                 {
-                    if (!QuestingBotsPluginConfig.MapsToAllowSleepingForQuestingBots.Value.HasFlag(map))
+                    if (!QuestingBotsPluginConfig.MapsToAllowSleepingForQuestingBots.Value.HasFlag(map) && !forceStreets)
                     {
                         return updateUseLayer(false);
                     }
@@ -118,14 +119,17 @@ namespace SPTQuestingBots.BotLogic.Sleep
             if (Vector3.Distance(BotOwner.Position, you.Position) < QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value)
             {
                 return updateUseLayer(false);
-            }
+            }*/
 
             // Enumerate all other bots on the map that are alive and active
-            IEnumerable<Player> allOtherBots = playerList
+            IEnumerable<BotOwner> allOtherBots = Singleton<IBotGame>.Instance.BotsController.Bots.BotOwners
                 .Where(b => !b.ProfileId.StartsWith("pmc"))
+                .Where(b => b.BotState == EBotState.Active)
+                .Where(b => !b.IsDead)
+                .Where(b => b.gameObject.activeSelf)
                 .Where(b => b.Id != BotOwner.Id);
 
-            foreach (Player bot in allOtherBots)
+            foreach (BotOwner bot in allOtherBots)
             {
                 // We only care about other bots that can quest
                 Objective.BotObjectiveManager otherBotObjectiveManager = bot.GetPlayer.gameObject.GetComponent<Objective.BotObjectiveManager>();
@@ -152,7 +156,7 @@ namespace SPTQuestingBots.BotLogic.Sleep
                 {
                     return updateUseLayer(false);
                 }
-            }*/
+            }
 
             setNextAction(BehaviorExtensions.BotActionType.Sleep, "Sleep");
             return updateUseLayer(true);
