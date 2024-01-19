@@ -27,14 +27,8 @@ namespace DrakiaXYZ.QuestTracker.Components
 
         public bool Visible
         {
-            get
-            {
-                return _panel.activeSelf;
-            }
-            set
-            {
-                _panel.SetActive(value);
-            }
+            get => _panel.activeSelf;
+            set => _panel.active = value;
         }
 
         public QuestTrackerPanelComponent()

@@ -432,8 +432,8 @@ namespace DrakiaXYZ.QuestTracker
             return typeof(BotsController).GetMethod("Init");
         }
 
-        [PatchPrefix]
-        public static void PatchPrefix()
+        [PatchPostfix]
+        public static void PatchPostfix()
         {
             QuestTrackerComponent.Enable();
         }

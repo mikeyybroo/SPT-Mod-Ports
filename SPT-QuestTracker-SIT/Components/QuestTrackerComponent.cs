@@ -16,7 +16,7 @@ namespace DrakiaXYZ.QuestTracker.Components
 {
     internal class QuestTrackerComponent : MonoBehaviour
     {
-        private QuestTrackerPanelComponent panel;
+        private QuestTrackerPanelComponent _panel;
 
         private float lastUpdate;
         private float updateFrequency = 0.1f;
@@ -26,7 +26,6 @@ namespace DrakiaXYZ.QuestTracker.Components
 
         private GameWorld gameWorld;
         private Player player;
-        private IBotGame botGame;
         private QuestControllerClass questController;
 
         private List<Quest> mapQuests = new List<Quest>();
@@ -46,13 +45,12 @@ namespace DrakiaXYZ.QuestTracker.Components
 
             // Setup access to game objects
             gameWorld = Singleton<GameWorld>.Instance;
-            botGame = Singleton<IBotGame>.Instance;
             player = gameWorld?.MainPlayer;
             commonUi = MonoBehaviourSingleton<CommonUI>.Instance;
 
-            if (gameWorld == null || botGame == null || player == null)
+            if (gameWorld == null || player == null)
             {
-                throw new Exception("Error creating QuestTrackerComponent, gameWorld, botGame or player was null");
+                throw new Exception("Error creating QuestTrackerComponent, gameWorld or player was null");
             }
             if (player.Profile == null || player.Profile.QuestsData == null)
             {
@@ -70,9 +68,9 @@ namespace DrakiaXYZ.QuestTracker.Components
             }
 
             // Add the panel to the BattleUiScreen
-            panel = Utils.GetOrAddComponent<QuestTrackerPanelComponent>(Singleton<GameUI>.Instance.BattleUiScreen);
-            panel.Visible = Settings.VisibleAtRaidStart.Value;
-            if (panel.Visible && Settings.AutoHide.Value)
+            _panel = Utils.GetOrAddComponent<QuestTrackerPanelComponent>(Singleton<GameUI>.Instance.BattleUiScreen);
+            _panel.Visible = Settings.VisibleAtRaidStart.Value;
+            if (_panel.Visible && Settings.AutoHide.Value)
             {
                 hideTime = Time.time + Settings.AutoHideTimer.Value;
             }
@@ -80,9 +78,7 @@ namespace DrakiaXYZ.QuestTracker.Components
             AttachEvents();
 
             // Add any current map quests
-            LocalGameType = StayInTarkovHelperConstants.EftTypes.Single (x => x.Name == "LocalGame");
-            var localGameBaseType = LocalGameType.GetType();
-            locationId = AccessTools.Property(localGameBaseType, "LocationObjectId").GetValue(botGame) as string;
+            locationId = gameWorld.LocationId;
             foreach (var quest in player.Profile.QuestsData)
             {
                 if (quest == null) continue;
@@ -131,7 +127,7 @@ namespace DrakiaXYZ.QuestTracker.Components
             if (e.ChangedSetting == Settings.AutoHide || e.ChangedSetting == Settings.AutoHideTimer)
             {
                 // If the panel is already visible, set the hide time
-                if (panel.Visible && Settings.AutoHide.Value)
+                if (_panel.Visible && Settings.AutoHide.Value)
                 {
                     hideTime = Time.time + Settings.AutoHideTimer.Value;
                 }
@@ -151,32 +147,32 @@ namespace DrakiaXYZ.QuestTracker.Components
 
             if (e.ChangedSetting == Settings.MainFontSize)
             {
-                panel.SetMainFontSize(Settings.MainFontSize.Value);
+                _panel.SetMainFontSize(Settings.MainFontSize.Value);
             }
 
             if (e.ChangedSetting == Settings.SubFontSize)
             {
-                panel.SetSubFontSize(Settings.SubFontSize.Value);
+                _panel.SetSubFontSize(Settings.SubFontSize.Value);
             }
 
             if (e.ChangedSetting == Settings.Transparency)
             {
-                panel.SetTransparency(Settings.Transparency.Value);
+                _panel.SetTransparency(Settings.Transparency.Value);
             }
 
             if (e.ChangedSetting == Settings.Alignment)
             {
-                panel.SetAlignment(Settings.Alignment.Value);
+                _panel.SetAlignment(Settings.Alignment.Value);
             }
 
             if (e.ChangedSetting == Settings.CoolKidsClub)
             {
-                panel.SetFont(Settings.CoolKidsClub.Value);
+                _panel.SetFont(Settings.CoolKidsClub.Value);
             }
 
             if (e.ChangedSetting == Settings.MaxWidth)
             {
-                panel.SetWidth(Settings.MaxWidth.Value);
+                _panel.SetWidth(Settings.MaxWidth.Value);
             }
         }
 
@@ -203,7 +199,7 @@ namespace DrakiaXYZ.QuestTracker.Components
 
             // Flag that an update check is needed
             lastUpdate = 0;
-            panel.SetQuests(trackedQuests, mapQuests);
+            _panel.SetQuests(trackedQuests, mapQuests);
         }
 
         private void QuestTracked(object sender, Quest quest)
@@ -221,9 +217,9 @@ namespace DrakiaXYZ.QuestTracker.Components
             // Check for the toggle button
             if (IsKeyPressed(Settings.PanelToggleKey.Value))
             {
-                panel.Visible = !panel.Visible;
+                _panel.Visible = !_panel.Visible;
 
-                if (panel.Visible && Settings.AutoHide.Value)
+                if (_panel.Visible && Settings.AutoHide.Value)
                 {
                     hideTime = Time.time + Settings.AutoHideTimer.Value;
                 }
@@ -232,7 +228,7 @@ namespace DrakiaXYZ.QuestTracker.Components
             // Handle auto hiding
             if (hideTime > 0 && Time.time > hideTime)
             {
-                panel.Visible = false;
+                _panel.Visible = false;
                 hideTime = 0;
             }
 
@@ -245,13 +241,13 @@ namespace DrakiaXYZ.QuestTracker.Components
 
             if (HaveQuestsChanged())
             {
-                panel.SetQuests(trackedQuests, mapQuests);
+                _panel.SetQuests(trackedQuests, mapQuests);
 
                 // If show on objective is true, and the panel is hidden or already on a timer, update the timer
-                if (Settings.ShowOnObjective.Value && (!panel.Visible || hideTime > 0))
+                if (Settings.ShowOnObjective.Value && (!_panel.Visible || hideTime > 0))
                 {
                     hideTime = Time.time + Settings.AutoHideTimer.Value;
-                    panel.Visible = true;
+                    _panel.Visible = true;
                 }
             }
         }
@@ -284,9 +280,9 @@ namespace DrakiaXYZ.QuestTracker.Components
 
         public static void Enable()
         {
-            if (Singleton<IBotGame>.Instantiated)
+            var gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld != null)
             {
-                var gameWorld = Singleton<GameWorld>.Instance;
                 Utils.GetOrAddComponent<QuestTrackerComponent>(gameWorld);
             }
         }
@@ -295,7 +291,7 @@ namespace DrakiaXYZ.QuestTracker.Components
         {
             Logger.LogInfo("QuestTrackerComponent OnDestroy");
             DetachEvents();
-            Destroy(panel);
+            Destroy(_panel);
         }
 
         private void AttachEvents()
