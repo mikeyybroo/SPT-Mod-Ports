@@ -46,7 +46,8 @@ namespace SPTQuestingBots.BotLogic.Sleep
             // Streets is hard capped at 200m range if enabled
             var sleepDistance = QuestingBotsPluginConfig.SleepingMinDistanceToYou.Value;
             var forceStreets = false;
-            if (Controllers.LocationController.CurrentLocation?.Id == "TarkovStreets" && QuestingBotsPluginConfig.StreetsMode.Value)
+            var currentLocation = Controllers.LocationController.CurrentLocation.Id;
+            if (currentLocation == "TarkovStreets" && QuestingBotsPluginConfig.StreetsMode.Value)
             {
                 forceStreets = true;
                 if (sleepDistance > 200) sleepDistance = 200;
@@ -56,6 +57,14 @@ namespace SPTQuestingBots.BotLogic.Sleep
             if (!QuestingBotsPluginConfig.SleepingEnabled.Value && !forceStreets)
             {
                 return updateUseLayer(false);
+            }
+            
+            // Check if location is enabled
+            if (QuestingBotsPluginConfig.TarkovMapIDToEnum.TryGetValue(currentLocation, out TarkovMaps location))
+            {
+                if (!QuestingBotsPluginConfig.MapsToAllowSleepingForQuestingBots.Value.HasFlag(location) && !forceStreets) {
+                    return updateUseLayer(false);
+                }
             }
             
             // Get playerlist and human players
