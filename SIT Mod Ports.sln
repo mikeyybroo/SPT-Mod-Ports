@@ -50,6 +50,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CactusPie.ContainerQuickLoo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPT-QuestTracker", "SPT-QuestTracker-SIT\SPT-QuestTracker.csproj", "{E3372B4A-28D7-4E39-B43E-37F0D39D07DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPTQuestingBots", "SPTQuestingBots-SIT\SPTQuestingBots.csproj", "{2704BAEC-427A-4611-921D-E8AF51D9ECED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		3.5.5|Any CPU = 3.5.5|Any CPU

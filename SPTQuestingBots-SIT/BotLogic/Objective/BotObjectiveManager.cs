@@ -124,6 +124,10 @@ namespace SPTQuestingBots.BotLogic.Objective
             {
                 IsQuestingAllowed = true;
             }
+            if ((botType == BotType.PScav) && ConfigController.Config.Questing.AllowedBotTypesForQuesting.PScav)
+            {
+                IsQuestingAllowed = true;
+            }
             if ((botType == BotType.Scav) && ConfigController.Config.Questing.AllowedBotTypesForQuesting.Scav)
             {
                 IsQuestingAllowed = true;
