@@ -182,7 +182,7 @@ namespace SAIN.SAINComponent.Classes.Mover
             if (enemy != null)
             {
                 var player = enemy.EnemyIAIDetails as Player;
-                if (enemy.RealDistance < 30f && player.MovementContext.ActualLinearSpeed > 0.33f)
+                if (enemy.RealDistance < 30f && player.MovementContext.ActualLinearVelocity > 0.33f)
                 {
                     LookToEnemy(enemy);
                     return true;
