@@ -25,7 +25,7 @@ using Comfort.Common;
 // This calls GClass1726.smethod_3 if the interactive is a LootItem
 // This returns an instance of GClass2805 which has a list field "Actions" containing all available actions of type GClass2804
 // GClass2804.Name will be directly used as the string that will be displayed in the list, so we set it to a TMPro string with correct color and bold
-using InteractionController = GClass1776;
+using InteractionController = GClass1854;
 using InteractionInstance = InteractionState1;
 using Action = Action1;
 using Quest0 = Quest;
@@ -970,7 +970,9 @@ namespace MoreCheckmarks
                             quest.Status == EQuestStatus.Started &&
                             quest.Template != null && quest.Template.Conditions != null && quest.Template.Conditions.ContainsKey(EQuestStatus.AvailableForFinish))
                         {
-                            IEnumerable<ConditionItem> conditions = quest.Template.GetConditions<ConditionItem>(EQuestStatus.AvailableForFinish);
+                            // TODO: FIX ME
+                            //IEnumerable<ConditionItem> conditions = quest.Template.GetConditions<ConditionItem>(EQuestStatus.AvailableForFinish);
+                            IEnumerable<ConditionItem> conditions = null;
                             if (conditions != null)
                             {
                                 foreach (ConditionItem condition in conditions)
@@ -1324,7 +1326,7 @@ namespace MoreCheckmarks
                     }
                     else // Don't include future quests, do as vanilla
                     {
-                        QuestTemplate rawQuest0 = null;
+                        global::QuestTemplate rawQuest0 = null;
                         ConditionItem conditionItem = null;
                         foreach (StatusData questDataClass in profile.QuestsData)
                         {
