@@ -124,6 +124,10 @@
 		<Reference Include="UnityEngine.UnityWebRequestModule">
 			<HintPath>..\References\UnityEngine.UnityWebRequestModule.dll</HintPath>
 		</Reference>
+		<Reference Include="DrakiaXYZ-BigBrain, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      		<SpecificVersion>False</SpecificVersion>
+      	<HintPath>..\References\DrakiaXYZ-BigBrain.dll</HintPath>
+    </Reference>
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="BotDebugPlugin.cs" />

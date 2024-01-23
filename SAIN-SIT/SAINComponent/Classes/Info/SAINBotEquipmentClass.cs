@@ -107,17 +107,17 @@ namespace SAIN.SAINComponent.Classes.Info
             WeaponClass = EnumValues.ParseWeaponClass(weapon.Template.weapClass);
 
             var mods = weapon.Mods;
-            for (int i = 0; i < mods.Length; i++)
+            foreach (Mod mod in mods)
             {
-                CheckMod(mods[i]);
-                if (mods[i].Slots.Length > 0)
+                CheckMod(mod);
+                if (mod.Slots.Length > 0)
                 {
-                    for (int j = 0; j < mods[i].Slots.Length; j++)
+                    foreach (Slot slot in mod.Slots)
                     {
-                        Item containedItem = mods[i].Slots[j].ContainedItem;
-                        if (containedItem != null && containedItem is Mod mod)
+                        Item containedItem = slot.ContainedItem;
+                        if (containedItem != null && containedItem is Mod mod2)
                         {
-                            Type modType = mod.GetType();
+                            Type modType = mod2.GetType();
                             if (IsSilencer(modType))
                             {
                                 HasSuppressor = true;
@@ -176,7 +176,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static bool IsSilencer(Type modType)
         {
-            return modType == GClass2606.TypeTable[SuppressorTypeId];
+            return modType == GClass2735.TypeTable[SuppressorTypeId];
         }
 
         private static bool IsOptic(Type modType)
@@ -203,14 +203,14 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static bool CheckTemplateType(Type modType, string id)
         {
-            if (GClass2606.TypeTable.TryGetValue(id, out Type result))
+            if (GClass2735.TypeTable.TryGetValue(id, out Type result))
             {
                 if (result == modType)
                 {
                     return true;
                 }
             }
-            if (GClass2606.TemplateTypeTable.TryGetValue(id, out result))
+            if (GClass2735.TemplateTypeTable.TryGetValue(id, out result))
             {
                 if (result == modType)
                 {

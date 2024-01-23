@@ -6,12 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using EFTCore = GClass502;
-using EFTFileSettings = GClass503;
+using EFTCore = GClass529;
+using EFTFileSettings = GClass530;
 using EFTSettingsGroup = BotSettingsComponents;
-using EFTSoundPlayer = GClass567;
-using EFTStatModifiersClass = GClass500;
-using EFTTime = GClass1237;
+using EFTSoundPlayer = GClass595;
+using EFTStatModifiersClass = GClass527;
+using EFTTime = GClass1293;
 using EFTSearchPoint = PlaceForCheck;
 using StayInTarkov;
 

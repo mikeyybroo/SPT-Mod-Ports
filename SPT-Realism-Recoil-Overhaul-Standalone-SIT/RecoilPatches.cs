@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 using System;
 using EFT.Animations;
 using PlayerInterface = IFirearms;
-using AimingSettings = Config4.AimingConfiguration;
+using AimingSettings = GClass1253.AimingConfiguration;
 using StayInTarkov;
 using StayInTarkov.Coop;
 using System.Threading.Tasks;

@@ -64,23 +64,22 @@ namespace SAIN.Helpers
             return 2f - weapon.SpeedFactor;
         }
 
-        private static float GetMuzzleLoudness(Mod[] mods)
+        private static float GetMuzzleLoudness(IEnumerable<Mod> mods)
         {
             if (!ModDetection.RealismLoaded)
             {
                 return 1f;
             }
             float loudness = 0f;
-            for (int i = 0; i < mods.Length; i++)
+            foreach (Mod mod in mods)
             {
-                //if the muzzle device has a silencer attached to it then it shouldn't contribute to the loudness stat.
-                if (mods[i].Slots.Length > 0 && mods[i].Slots[0].ContainedItem != null && IsSilencer((Mod)mods[i].Slots[0].ContainedItem))
+                if (mod.Slots.Length > 0 && mod.Slots[0].ContainedItem != null && IsSilencer((Mod)mod.Slots[0].ContainedItem))
                 {
                     continue;
                 }
                 else
                 {
-                    loudness += mods[i].Template.Loudness;
+                    loudness += mod.Template.Loudness;
                 }
             }
             return (loudness / 200) + 1f;
@@ -116,7 +115,7 @@ namespace SAIN.Helpers
 
         public static bool IsSilencer(Mod mod)
         {
-            return mod.GetType() == GClass2606.TypeTable[SuppressorTypeId];
+            return mod.GetType() == GClass2735.TypeTable[SuppressorTypeId];
         }
 
         public static readonly string SuppressorTypeId = "550aa4cd4bdc2dd8348b456c";
