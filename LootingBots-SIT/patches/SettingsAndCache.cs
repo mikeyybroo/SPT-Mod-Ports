@@ -1,7 +1,6 @@
 using System.Reflection;
 
-//using Aki.Reflection.Patching;
-using StayInTarkov;
+using Aki.Reflection.Patching;
 
 using EFT;
 
@@ -41,13 +40,13 @@ namespace LootingBots.Patch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(Settings10).GetMethod("ApplyPresetLocation");
+            return typeof(BotDifficultySettingsClass).GetMethod("ApplyPresetLocation");
         }
 
         [PatchPostfix]
         private static void PatchPostfix(
             BotLocationModifier modifier,
-            ref Settings10 __instance,
+            ref BotDifficultySettingsClass __instance,
             ref WildSpawnType ___wildSpawnType_0
         )
         {
