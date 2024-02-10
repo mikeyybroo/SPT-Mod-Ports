@@ -8,6 +8,7 @@ using SAIN.Preset.GlobalSettings.Categories;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static EFT.Player;
@@ -107,17 +108,18 @@ namespace SAIN.SAINComponent.Classes.Info
             WeaponClass = EnumValues.ParseWeaponClass(weapon.Template.weapClass);
 
             var mods = weapon.Mods;
-            foreach (Mod mod in mods)
+            var enumerable = mods as Mod[] ?? mods.ToArray();
+            for (int i = 0; i < enumerable.Length; i++)
             {
-                CheckMod(mod);
-                if (mod.Slots.Length > 0)
+                CheckMod(enumerable[i]);
+                if (enumerable[i].Slots.Length > 0)
                 {
-                    foreach (Slot slot in mod.Slots)
+                    for (int j = 0; j < enumerable[i].Slots.Length; j++)
                     {
-                        Item containedItem = slot.ContainedItem;
-                        if (containedItem != null && containedItem is Mod mod2)
+                        Item containedItem = enumerable[i].Slots[j].ContainedItem;
+                        if (containedItem != null && containedItem is Mod mod)
                         {
-                            Type modType = mod2.GetType();
+                            Type modType = mod.GetType();
                             if (IsSilencer(modType))
                             {
                                 HasSuppressor = true;

@@ -2,6 +2,7 @@
 using EFT.InventoryLogic;
 using EFT.Weather;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static EFT.Player;
 
@@ -71,15 +72,17 @@ namespace SAIN.Helpers
                 return 1f;
             }
             float loudness = 0f;
-            foreach (Mod mod in mods)
+            var enumerable = mods as Mod[] ?? mods.ToArray();
+            for (int i = 0; i < enumerable.Length; i++)
             {
-                if (mod.Slots.Length > 0 && mod.Slots[0].ContainedItem != null && IsSilencer((Mod)mod.Slots[0].ContainedItem))
+                //if the muzzle device has a silencer attached to it then it shouldn't contribute to the loudness stat.
+                if (enumerable[i].Slots.Length > 0 && enumerable[i].Slots[0].ContainedItem != null && IsSilencer((Mod)enumerable[i].Slots[0].ContainedItem))
                 {
                     continue;
                 }
                 else
                 {
-                    loudness += mod.Template.Loudness;
+                    loudness += enumerable[i].Template.Loudness;
                 }
             }
             return (loudness / 200) + 1f;
