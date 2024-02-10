@@ -108,8 +108,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\References\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="StayInTarkov">
-      <HintPath>..\References\StayInTarkov.dll</HintPath>
+    <Reference Include="MultiplayerTarkov">
+      <HintPath>..\References\MultiplayerTarkov.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

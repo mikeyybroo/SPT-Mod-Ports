@@ -1,5 +1,4 @@
-﻿using StayInTarkov;
-using EFT;
+﻿using EFT;
 using EFT.Interactive;
 using HarmonyLib;
 using SAIN.Components;
@@ -10,6 +9,7 @@ using DrakiaXYZ.BigBrain.Brains;
 using UnityEngine.AI;
 using SAIN.Layers;
 using System;
+using Aki.Reflection.Patching;
 
 namespace SAIN.Patches.Generic
 {

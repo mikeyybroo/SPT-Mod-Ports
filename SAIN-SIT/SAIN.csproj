@@ -151,8 +151,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\References\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="StayInTarkov">
-      <HintPath>..\References\StayInTarkov.dll</HintPath>
+    <Reference Include="MultiplayerTarkov">
+      <HintPath>..\References\MultiplayerTarkov.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -220,6 +220,9 @@
     </Reference>
     <Reference Include="DrakiaXYZ-BigBrain">
       <HintPath>..\References\DrakiaXYZ-BigBrain.dll</HintPath>
+    </Reference>
+    <Reference Include="Aki.Reflection">
+      <HintPath>..\References\Aki.Reflection.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

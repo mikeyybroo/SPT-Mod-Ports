@@ -8,7 +8,7 @@ namespace SAIN.SAINComponent.BaseClasses
 {
     public class SAINPersonClass : PersonBaseClass, ISAINPerson
     {
-        public SAINPersonClass(IAIDetails person) : base(person)
+        public SAINPersonClass(IPlayer person) : base(person)
         {
             Transform = new SAINPersonTransformClass(this);
             Profile = person.Profile;

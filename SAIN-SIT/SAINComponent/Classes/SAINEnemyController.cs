@@ -80,7 +80,7 @@ namespace SAIN.SAINComponent.Classes
         public void CheckAddEnemy()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
-            IAIDetails IAIDetails = goalEnemy?.Person;
+            IPlayer IAIDetails = goalEnemy?.Person;
             bool addEnemy = true;
 
             if (goalEnemy == null || IAIDetails == null)

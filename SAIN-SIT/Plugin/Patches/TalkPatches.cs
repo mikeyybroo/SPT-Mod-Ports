@@ -1,10 +1,10 @@
-﻿using StayInTarkov;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using SAIN.Components;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Aki.Reflection.Patching;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Decision;
 using SAIN.SAINComponent.Classes.Talk;

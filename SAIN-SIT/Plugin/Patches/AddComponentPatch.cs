@@ -1,8 +1,8 @@
-﻿using StayInTarkov;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using System.Reflection;
 using System;
+using Aki.Reflection.Patching;
 using SAIN.SAINComponent;
 using SAIN.Components.BotController;
 

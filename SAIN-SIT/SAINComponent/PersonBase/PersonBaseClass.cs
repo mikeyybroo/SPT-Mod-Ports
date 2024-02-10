@@ -6,12 +6,12 @@ namespace SAIN.SAINComponent.BaseClasses
 {
     public abstract class PersonBaseClass
     {
-        public PersonBaseClass(IAIDetails iPlayer)
+        public PersonBaseClass(IPlayer iPlayer)
         {
             IAIDetails = iPlayer;
         }
 
-        public IAIDetails IAIDetails { get; private set; }
+        public IPlayer IAIDetails { get; private set; }
         public bool PlayerNull => IAIDetails == null;
         public Player Player => IAIDetails as Player;
     }

@@ -9,7 +9,7 @@ namespace SAIN.SAINComponent.BaseClasses
     {
         void Update();
         bool PlayerNull { get; }
-        IAIDetails IAIDetails { get; }
+        IPlayer IAIDetails { get; }
         Player Player { get; }
         Vector3 Position { get; }
         SAINPersonTransformClass Transform { get; }

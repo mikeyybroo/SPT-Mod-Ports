@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-//using Aki.Reflection.Patching;
+using Aki.Reflection.Patching;
 using BepInEx;
 using DrakiaXYZ.BotDebug.Components;
 using DrakiaXYZ.BotDebug.Helpers;
@@ -8,7 +8,6 @@ using DrakiaXYZ.BotDebug.VersionChecker;
 using EFT;
 using HarmonyLib;
 using UnityEngine;
-using StayInTarkov;
 
 namespace DrakiaXYZ.BotDebug
 {

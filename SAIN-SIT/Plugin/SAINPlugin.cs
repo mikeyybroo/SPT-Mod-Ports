@@ -12,7 +12,6 @@ using System;
 using UnityEngine;
 using static SAIN.AssemblyInfo;
 using static SAIN.Editor.SAINLayout;
-using StayInTarkov;
 
 namespace SAIN
 {
@@ -23,7 +22,7 @@ namespace SAIN
         public const string Configuration = SPTVersion;
         public const string Company = "";
         public const string Product = SAINName;
-        public const string Copyright = "Copyright © 2023 Solarint";
+        public const string Copyright = "Copyright ï¿½ 2023 Solarint";
         public const string Trademark = "";
         public const string Culture = "";
 

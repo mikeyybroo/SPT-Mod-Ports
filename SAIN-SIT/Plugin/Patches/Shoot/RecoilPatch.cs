@@ -1,10 +1,11 @@
-﻿using StayInTarkov;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
 using System;
 using System.Linq;
+using Aki.Reflection.Patching;
+using Aki.Reflection.Utils;
 using SAIN.Helpers;
 using SAIN.SAINComponent;
 using SAIN.SAINComponent.Classes.Decision;
@@ -21,14 +22,14 @@ namespace SAIN.Patches.Shoot
         private static Type _aimingDataType;
         protected override MethodBase GetTargetMethod()
         {
-            _aimingDataType = StayInTarkovHelperConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
+            _aimingDataType = PatchConstants.EftTypes.Single(x => x.GetProperty("LastSpreadCount") != null && x.GetProperty("LastAimTime") != null);
             return AccessTools.Method(_aimingDataType, "method_13");
         }
 
         private static float DebugTimer;
 
         [PatchPrefix]
-        public static bool PatchPrefix(ref BotAiming1 __instance, ref BotOwner ___botOwner_0, ref Vector3 ___vector3_5, ref Vector3 ___vector3_4, ref float ___float_13)
+        public static bool PatchPrefix(ref GClass518 __instance, ref BotOwner ___botOwner_0, ref Vector3 ___vector3_5, ref Vector3 ___vector3_4, ref float ___float_13)
         {
             // Applies aiming offset, recoil offset, and scatter offsets
             Vector3 finalTarget = __instance.RealTargetPoint
@@ -55,7 +56,7 @@ namespace SAIN.Patches.Shoot
 
             if (SAINPlugin.LoadedPreset.GlobalSettings.General.HeadShotProtection)
             {
-                IAIDetails person = ___botOwner_0.Memory.GoalEnemy?.Person;
+                IPlayer person = ___botOwner_0.Memory.GoalEnemy?.Person;
                 if (person != null && 1 < 0)
                 {
                     // Get the head DrawPosition of a bot's current enemy if it exists

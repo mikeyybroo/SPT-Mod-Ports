@@ -1,9 +1,9 @@
-﻿using StayInTarkov;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using SAIN.Components.Helpers;
 using SAIN.Helpers;
 using System.Reflection;
+using Aki.Reflection.Patching;
 using UnityEngine;
 
 namespace SAIN.Patches.Hearing

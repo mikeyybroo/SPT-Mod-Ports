@@ -1,5 +1,4 @@
-﻿using StayInTarkov;
-using EFT;
+﻿using EFT;
 using HarmonyLib;
 using SAIN.Preset;
 using SAIN.Components;
@@ -7,6 +6,7 @@ using SAIN.Plugin;
 using SAIN.Preset.BotSettings.SAINSettings;
 using System;
 using System.Reflection;
+using Aki.Reflection.Patching;
 using UnityEngine;
 using Comfort.Common;
 using SAIN.SAINComponent.Classes;
@@ -93,7 +93,7 @@ namespace SAIN.Patches.Vision
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(BotOwner)?.GetMethod("IsEnemyLookingAtMe", BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(IAIDetails) }, null);
+            return typeof(BotOwner)?.GetMethod("IsEnemyLookingAtMe", BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(IPlayer) }, null);
         }
 
         [PatchPrefix]

@@ -1,10 +1,10 @@
-﻿using StayInTarkov;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using SAIN.Components;
 using SAIN.Helpers;
 using System.Reflection;
+using Aki.Reflection.Patching;
 using UnityEngine;
 
 namespace SAIN.Patches.Shoot

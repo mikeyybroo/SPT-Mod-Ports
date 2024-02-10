@@ -29,7 +29,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public void Init()
         {
-            InventoryController = Reflection.GetValue<InventoryController>(Player, InventoryControllerProp);
+            InventoryController = Reflection.GetValue<InventoryControllerClass>(Player, InventoryControllerProp);
             GearInfo = new GearInfo(Player, InventoryController);
         }
 
@@ -47,7 +47,7 @@ namespace SAIN.SAINComponent.Classes.Info
         {
         }
 
-        public InventoryController InventoryController { get; private set; }
+        public InventoryControllerClass InventoryController { get; private set; }
 
         // delete later
         public bool HasEarPiece => GearInfo.HasEarPiece;
@@ -176,7 +176,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static bool IsSilencer(Type modType)
         {
-            return modType == GClass2737.TypeTable[SuppressorTypeId];
+            return modType == TemplateIdToObjectMappingsClass.TypeTable[SuppressorTypeId];
         }
 
         private static bool IsOptic(Type modType)
@@ -203,14 +203,14 @@ namespace SAIN.SAINComponent.Classes.Info
 
         private static bool CheckTemplateType(Type modType, string id)
         {
-            if (GClass2737.TypeTable.TryGetValue(id, out Type result))
+            if (TemplateIdToObjectMappingsClass.TypeTable.TryGetValue(id, out Type result))
             {
                 if (result == modType)
                 {
                     return true;
                 }
             }
-            if (GClass2737.TemplateTypeTable.TryGetValue(id, out result))
+            if (TemplateIdToObjectMappingsClass.TemplateTypeTable.TryGetValue(id, out result))
             {
                 if (result == modType)
                 {
@@ -238,7 +238,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
     public class GearInfo
     {
-        public GearInfo(Player player, InventoryController inventoryController)
+        public GearInfo(Player player, InventoryControllerClass inventoryController)
         {
             Player = player;
             InventoryController = inventoryController;
@@ -246,7 +246,7 @@ namespace SAIN.SAINComponent.Classes.Info
 
         public readonly Player Player;
 
-        public readonly InventoryController InventoryController;
+        public readonly InventoryControllerClass InventoryController;
 
         public void Update()
         {

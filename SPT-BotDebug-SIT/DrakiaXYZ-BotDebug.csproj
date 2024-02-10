@@ -54,13 +54,10 @@
 		<LangVersion>7.3</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
-		<Reference Include="StayInTarkov">
-			<HintPath>..\References\StayInTarkov.dll</HintPath>
-		</Reference>
 		<Reference Include="0Harmony">
 			<HintPath>..\References\0Harmony.dll</HintPath>
 		</Reference>
-		<!--<Reference Include="Aki.Common">
+		<Reference Include="Aki.Common">
 			<HintPath>..\References\Aki.Common.dll</HintPath>
 		</Reference>
 		<Reference Include="Aki.Reflection">
@@ -68,7 +65,7 @@
 		</Reference>
 		<Reference Include="aki_PrePatch">
 			<HintPath>..\References\aki_PrePatch.dll</HintPath>
-		</Reference>-->
+		</Reference>
 		<Reference Include="Assembly-CSharp">
 			<HintPath>..\References\Assembly-CSharp.dll</HintPath>
 		</Reference>
